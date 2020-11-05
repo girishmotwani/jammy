@@ -38,4 +38,11 @@ This will first prompt for user credentials to allow the framework to submit res
 
 ## writing tests
 
+**Style Guide**:
+The Google Python Style Guide has the following convention:
+
+module_name, package_name, ClassName, method_name, ExceptionName, function_name, GLOBAL_CONSTANT_NAME, global_var_name, instance_var_name, function_parameter_name, local_var_name.
+
+**Tests**:
+
 A general rule of thumb is that all tests (their function names, to be exact) need to be prefixed with 'test_'. This is how pytest will recognize a function as a test.
