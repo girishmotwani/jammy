@@ -50,14 +50,24 @@ class ArmClient(object):
         rg = self.put_resource(resource_group, resource_json, '2019-10-01')
 
     def deploy_template(self, subscriptionId, deployment_name, resource_group_name, location, template_file, template_params=''):
-        self.create_resource_group(self, subscriptionId, resourceGroupName, location)
-        # FIXME: TODO: currently dont support template params 
-        resource_json = ''
-        with open(template_file, 'r') as f:
-            resource_json = f.read()
+        self.create_resource_group(subscriptionId, resource_group_name, location)
+        resourceId = '/subscriptions/' + subscriptionId + '/resourceGroups/' + resource_group_name + '/providers/Microsoft.Resources/deployments/{0}'.format(deployment_name)
 
-        resourceId = '/subscriptions/' + subscriptionId + '/providers/Microsoft.Resources/deployments/{0}'.format(deployment_name)
-        result = self.put_resource(resourceId, resource_json, '2019-10-01')
+        if template_file.startswith('/windir/c'):
+            template_file = template_file[len('/windir/c'):]
+        url = self.baseUrl + resourceId + '?api-version=2019-10-01'
+        headers = ' ' + '-h "Referer: ' + url + '"'
+        cmd = self._armclient + " put " + url + " " + "@" + template_file + ' ' + headers
+        output = self.cmd_wrapper(cmd)
+
+        result = output.decode("utf-8")
+        try:
+            # if the call succeeded, result should be json data
+            json.loads(result)
+        except:
+            # incase of failure return string as error
+            raise ArmClientError(result)
+
         return result 
 
     def put_resource(self, resourceId, resourceJson, apiVersion):

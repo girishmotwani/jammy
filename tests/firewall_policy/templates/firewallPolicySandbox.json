@@ -14,7 +14,7 @@
 				},
 				"adminUsername": {
 					"type": "string",
-					"defaultValue": "administrator",
+					"defaultValue": "jammytestuser",
 					"metadata": {
 						"description": "Username for the Virtual Machine."
 					}
@@ -24,17 +24,6 @@
 					"defaultValue": "[resourceGroup().location]",
 					"metadata": {
 						"description": "Location for all resources, the location must support Availability Zones if required."
-					}
-				},
-				"availabilityZones": {
-					"type": "array",
-					"defaultValue": [
-						"1",
-						"2",
-						"3"
-					],
-					"metadata": {
-						"description": "Zone numbers e.g. 1,2,3."
 					}
 				},
 				"vmSize": {
@@ -90,7 +79,6 @@
 				"storageAccountName": "[concat(uniquestring(resourceGroup().id), 'sajumpbox')]",
 				"azfwRouteTableName": "AzfwRouteTable",
 				"firewallName": "firewall1",
-				"firewallPolicyName": "firewallPolicy1",
 				"publicIPNamePrefix": "publicIP",
 				"azureFirewallSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets',parameters('virtualNetworkName'), variables('azureFirewallSubnetName'))]",
 				"azureFirewallSubnetJSON": "[json(format('{{\"id\": \"{0}\"}}', variables('azureFirewallSubnetId')))]",
@@ -400,114 +388,15 @@
 				},
 				{
 					"apiVersion": "2020-04-01",
-					"type": "Microsoft.Network/firewallPolicies",
-					"name": "[variables('firewallPolicyName')]",
-					"location": "[parameters('location')]",
-					"properties": {
-						"threatIntelMode": "Alert"
-					},
-					"resources": [
-						{
-							"apiVersion": "2020-04-01",
-							"type": "ruleGroups",
-							"name": "NetworkRG",
-							"location": "[parameters('location')]",
-							"dependsOn": [
-								"[resourceId('Microsoft.Network/firewallPolicies', variables('firewallPolicyName'))]"
-							],
-							"properties": {
-								"priority": 100,
-								"rules": [
-									{
-										"name": "NetworkRule1",
-										"conditionType": "Network",
-										"ruleType": "FirewallPolicyFilterRule",
-										"action": {
-											"type": "Allow"
-										},
-										"priority": 230,
-										"ruleConditions": [
-											{
-												"name": "NetRC1",
-												"ipProtocols": [
-													"TCP"
-												],
-												"destinationPorts": [
-													"80"
-												],
-												"sourceAddresses": [
-													"*"
-												],
-												"destinationAddresses": [
-													"*"
-												],
-												"ruleConditionType": "NetworkRuleCondition"
-											}
-										]
-									}
-								]
-							}
-						},
-						{
-							"apiVersion": "2020-04-01",
-							"type": "ruleGroups",
-							"name": "AppRG",
-							"location": "[parameters('location')]",
-							"dependsOn": [
-								"[resourceId('Microsoft.Network/firewallPolicies',variables('firewallPolicyName'))]"
-							],
-							"properties": {
-								"priority": 200,
-								"rules": [
-									{
-										"name": "AppRule1",
-										"priority": 4444,
-										"ruleType": "FirewallPolicyFilterRule",
-										"action": {
-											"type": "Allow"
-										},
-										"ruleConditions": [
-											{
-												"ruleConditionType": "ApplicationRuleCondition",
-												"name": "AppRC1",
-												"protocols": [
-													{
-														"protocolType": "Http",
-														"port": 8000
-													}
-												],
-												"targetFqdns": [
-													"*"
-												],
-												"sourceAddresses": [
-													"*"
-												]
-											}
-										]
-									}
-								]
-							}
-						}
-					]
-				},
-				{
-					"apiVersion": "2020-04-01",
 					"type": "Microsoft.Network/azureFirewalls",
 					"name": "[variables('firewallName')]",
 					"location": "[parameters('location')]",
-					"zones": "[if(equals(length(parameters('availabilityZones')), 0), json('null'), parameters('availabilityZones'))]",
 					"dependsOn": [
 						"[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
-						"[resourceId('Microsoft.Network/firewallPolicies', variables('firewallPolicyName'))]",
-						"[resourceId('Microsoft.Network/firewallPolicies/ruleGroups', variables('firewallPolicyName'), 'AppRG')]",
-						"[resourceId('Microsoft.Network/firewallPolicies/ruleGroups', variables('firewallPolicyName'), 'NetworkRG')]",
 						"publicIpCopy"
 					],
 					"properties": {
-						"ipConfigurations": "[variables('azureFirewallIpConfigurations')]",
-						"firewallPolicy": {
-							"id": "[resourceId('Microsoft.Network/firewallPolicies', variables('firewallPolicyName'))]"
-						}
+						"ipConfigurations": "[variables('azureFirewallIpConfigurations')]"
 					}
 				}
 			]

@@ -3,6 +3,7 @@ Tests for firewall policy in Jammy
 """
 
 import json
+import os
 import pytest
 from jammy.armclient import ArmClient
 from jammy.models.firewallPolicy import *
@@ -72,6 +73,22 @@ class TestFirewallPolicy:
 
         resourceJson = json.dumps(rcg.serialize())
 
+        resp = cl.put_resource(resourceId, resourceJson, version.VERSION)
+
+        print(resp)
+
+    def test_firewall_policy_attach(self, subscriptionId, location, resourceGroup):
+        fp = FirewallPolicy()
+        fp.location = location
+        fp.resourceGroup = resourceGroup
+        
+        template_file = os.path.join(os.path.dirname(__file__), 'templates', 'firewallPolicySandbox.json')
+        cl = ArmClient()
+
+        # first deploy the ARM template 
+        cl.deploy_template(subscriptionId, "test-deployment", resourceGroup, location, template_file)
+        resourceId = '/subscriptions/' + subscriptionId + '/resourceGroups/' + resourceGroup + '/providers/Microsoft.Network/firewallPolicies/testfp02'
+        resourceJson = json.dumps(fp.serialize())
         resp = cl.put_resource(resourceId, resourceJson, version.VERSION)
 
         print(resp)
