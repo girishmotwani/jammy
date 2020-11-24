@@ -6,6 +6,7 @@ Write end-to-end tests for Azure resources.
 ## reference
 
 Refer to the [pytest documentation](https://pytest.org) for information on the test framework.
+
 Refer to the [Developer Guide](DEVELOPER.md) to learn about Jammy internals
 
 ## requirements
