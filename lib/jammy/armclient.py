@@ -44,6 +44,11 @@ class ArmClient(object):
 
         return output.strip()
 
+    def wait_for_deployment_complete(resource_id, api_version):
+        result = self.get_resource(resource_id, api_version)
+
+
+
     def create_resource_group(self, subscriptionId, resource_group_name, location):
         resource_group = '/subscriptions/' + subscriptionId + '/resourceGroups/' + resource_group_name
         resource_json = self.get_resource_group_body(location)
@@ -67,6 +72,8 @@ class ArmClient(object):
         except:
             # incase of failure return string as error
             raise ArmClientError(result)
+
+        self.wait_for_deployment_complete(resourceId, '2019-10-01')
 
         return result 
 
