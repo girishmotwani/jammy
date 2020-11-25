@@ -24,10 +24,6 @@ class ArmClient(object):
     def baseUrl(self):
         return self._baseUrl
 
-    @property
-    def apiVersion(self):
-        return self._apiVersion
-
     def get_resource_group_body(self, location):
         body = { "location": location}
         return json.dumps(body)
@@ -44,7 +40,7 @@ class ArmClient(object):
 
         return output.strip()
 
-    def wait_for_deployment_complete(resource_id, api_version):
+    def wait_for_deployment_complete(self, resource_id, api_version):
         result = self.get_resource(resource_id, api_version)
 
 
@@ -52,7 +48,7 @@ class ArmClient(object):
     def create_resource_group(self, subscriptionId, resource_group_name, location):
         resource_group = '/subscriptions/' + subscriptionId + '/resourceGroups/' + resource_group_name
         resource_json = self.get_resource_group_body(location)
-        rg = self.put_resource(resource_group, resource_json, '2019-10-01')
+        self.put_resource(resource_group, resource_json, '2019-10-01')
 
     def deploy_template(self, subscriptionId, deployment_name, resource_group_name, location, template_file, template_params=''):
         self.create_resource_group(subscriptionId, resource_group_name, location)
@@ -115,10 +111,3 @@ class ArmClient(object):
         headers = ' ' + '-h "Referer: ' + url + '"'
         cmd = self._armclient + ' delete ' + url + headers
         self.cmd_wrapper(cmd)
-
-def main():
-    cl = ArmClient()
-    cl.get('/subscriptions/f6cb8187-b300-4c2d-9b23-c00e7e98d799/resourceGroups/checkpointTestRG')
-
-if __name__ == '__main__':
-    main()
