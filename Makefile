@@ -8,18 +8,20 @@ setup: ## Install/reinstall all required dependencies
 	pip3 install  --trusted-host pypi.org --trusted-host files.pythonhosted.org -r requirements.txt --upgrade --user; \
 	cd lib && pip3 install --user -e .
 
+setup-windows: ## Install/reinstall all required dependencies
+	pip3 install  --trusted-host pypi.org --trusted-host files.pythonhosted.org -r requirements.txt --upgrade \
+	&& cd lib && pip3 install -e .
+
 install: ## Install python modules
 	cd lib && pip3 install --user -e .
 
 auth-and-test: ## Run FWM feature tests in one job
-	mkdir -p tests/logs
 	armclient.exe login
 	@echo $(DISPLAY_BOLD)"==> Running Firewall Policy tests"$(DISPLAY_RESET)
 	python3 -m pytest -s tests/firewall_policy/firewall_policy_test.py \
 	       	--resourceGroup test01RG --subscriptionId $(SUBSCRIPTION_ID) \
 		--location westus
 test: ## Run FWM feature tests in one job
-	mkdir -p tests/logs
 	@echo $(DISPLAY_BOLD)"==> Running Firewall Policy tests"$(DISPLAY_RESET)
 	python3 -m pytest -s tests/firewall_policy/firewall_policy_test.py \
 	       	--resourceGroup test01RG --subscriptionId $(SUBSCRIPTION_ID) \
