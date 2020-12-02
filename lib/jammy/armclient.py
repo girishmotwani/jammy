@@ -76,7 +76,10 @@ class ArmClient(object):
     def put_resource(self, resource_id, resource_json, api_version):
         url = self.base_url + resource_id + '?api-version=' + api_version
         headers = ' ' + '-h "Referer: ' + url + '"'
-        cmd = self._armclient + " put " + url + " " + "'" +  resource_json + "'" + headers
+
+        # escape the quotes in resource json string
+        resource_json = resource_json.replace('"', r'\"')
+        cmd = self._armclient + " put " + url + " " + '"' + resource_json + '"' + headers
         output = self.cmd_wrapper(cmd)
 
         result = output.decode("utf-8")
