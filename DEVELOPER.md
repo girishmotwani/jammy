@@ -1,5 +1,9 @@
 # Developer Documentation
 
+Jammy uses armclient to perform cRUID operations on Azure resources. It uses python representation of the resources to
+manipulate the resources. The python representations are generated using the swagger specification. Autorest tool can 
+be used to auto-generate the resource models.
+
 Jammy source code is organized into two top level folders:
 * lib
 * tests
