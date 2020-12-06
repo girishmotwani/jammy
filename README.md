@@ -13,6 +13,7 @@ Refer to the [Developer Guide](DEVELOPER.md) to learn about Jammy internals
 * git
 * Python 3.8.2 (tested with wsl2 on Windows 10)
 * Armclient [armclient](https://github.com/projectkudu/ARMClient)
+* make (for windows users) [make](https://chocolatey.org/packages/make)
 
 ## setup and configuration
 **Clone the repository**:
@@ -22,13 +23,20 @@ $ git clone
 
 **Set the environment variable AZURE_SUBSCRIPTION_ID to the Azure Subscription
 ```
-$ export AZURE_SUBSCRIPTION_ID=<subscriptionId>
+$ export AZURE_SUBSCRIPTION_ID=<subscriptionId> (Linux)
+```
+
+```
+setx AZURE_SUBSCRIPTION_ID  "<sub_id>" (windows). Once you set this environment variable, close the window and open a new window to use the setting
 ```
 **Install modules and pip-install any required dependencies**:
 ```
-$ make setup
+$ make setup (Linux)
 ```
 
+```
+$ make setup-windows (Windows)
+```
 ## running tests
 You must invoke py.test from the root directory to properly collect conftest fixtures.
 
