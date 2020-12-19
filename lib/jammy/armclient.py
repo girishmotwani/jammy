@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 
+import backoff
 import json
 import sched, time
 import subprocess
@@ -40,10 +41,16 @@ class ArmClient(object):
 
         return output.strip()
 
+    @backoff.on_predicate(backoff.expo, lambda x: (x == "Accepted"), max_time=3600)
     def wait_for_deployment_complete(self, resource_id, api_version):
-        result = self.get_resource(resource_id, api_version)
+        response = self.get_resource(resource_id, api_version)
 
-
+        result = json.loads(response)
+        if 'properties' in result:
+            properties = result['properties']
+            provisioningState = properties['provisioningState']
+            return provisioningState
+        return ''
 
     def create_resource_group(self, subscription_id, resource_group_name, location):
         resource_group = '/subscriptions/' + subscription_id + '/resourceGroups/' + resource_group_name
