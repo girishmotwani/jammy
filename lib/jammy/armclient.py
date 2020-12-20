@@ -41,7 +41,7 @@ class ArmClient(object):
 
         return output.strip()
 
-    @backoff.on_predicate(backoff.expo, lambda x: (x == "Accepted"), max_time=3600)
+    @backoff.on_predicate(backoff.expo, lambda x: (x != "Succeeded" and x != "Failed"), max_time=3600)
     def wait_for_deployment_complete(self, resource_id, api_version):
         response = self.get_resource(resource_id, api_version)
 
@@ -65,13 +65,15 @@ class ArmClient(object):
             template_file = template_file[len('/windir/c'):]
         url = self.base_url + resource_id + '?api-version=2019-10-01'
         headers = ' ' + '-h "Referer: ' + url + '"'
-        cmd = self._armclient + " put " + url + " " + "@" + template_file + ' ' + headers
-        output = self.cmd_wrapper(cmd)
-
-        result = output.decode("utf-8")
         try:
+            cmd = self._armclient + " put " + url + " " + "@" + template_file + ' ' + headers
+            output = self.cmd_wrapper(cmd)
+
+            result = output.decode("utf-8")
             # if the call succeeded, result should be json data
             json.loads(result)
+        except subprocess.CalledProcessError as e:
+            raise ArmClientError(e.output)
         except:
             # incase of failure return string as error
             raise ArmClientError(result)
@@ -86,13 +88,15 @@ class ArmClient(object):
 
         # escape the quotes in resource json string
         resource_json = resource_json.replace('"', r'\"')
-        cmd = self._armclient + " put " + url + " " + '"' + resource_json + '"' + headers
-        output = self.cmd_wrapper(cmd)
-
-        result = output.decode("utf-8")
         try:
+            cmd = self._armclient + " put " + url + " " + '"' + resource_json + '"' + headers
+            output = self.cmd_wrapper(cmd)
+
+            result = output.decode("utf-8")
             # if the call succeeded, result should be json data
             json.loads(result)
+        except subprocess.CalledProcessError as e:
+            raise ArmClientError(e.output)
         except:
             # incase of failure return string as error
             raise ArmClientError(result)
@@ -103,13 +107,15 @@ class ArmClient(object):
     def get_resource(self, resource_id, api_version):
         url = self.base_url + resource_id + '?api-version=' + api_version
         headers = ' ' + '-h "Referer: ' + url + '"'
-        cmd = self._armclient + ' get ' + url + headers
-        output = self.cmd_wrapper(cmd)
-
-        result = output.decode("utf-8")
         try:
+            cmd = self._armclient + ' get ' + url + headers
+            output = self.cmd_wrapper(cmd)
+
+            result = output.decode("utf-8")
             # if the call succeeded, result should be json data
             json.loads(result)
+        except subprocess.CalledProcessError as e:
+            raise ArmClientError(e.output)
         except:
             # incase of failure return string as error
             raise ArmClientError(result)
