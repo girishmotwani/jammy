@@ -57,6 +57,10 @@ class ArmClient(object):
         resource_json = self.get_resource_group_body(location)
         self.put_resource(resource_group, resource_json, '2019-10-01')
 
+    def delete_resource_group(self, subscription_id, resource_group_name, location):
+        resource_group = '/subscriptions/' + subscription_id + '/resourceGroups/' + resource_group_name
+        self.delete_resource(resource_group, '2019-10-01')
+
     def deploy_template(self, subscription_id, deployment_name, resource_group_name, location, template_file, template_params=''):
         self.create_resource_group(subscription_id, resource_group_name, location)
         resource_id = '/subscriptions/' + subscription_id + '/resourceGroups/' + resource_group_name + '/providers/Microsoft.Resources/deployments/{0}'.format(deployment_name)
@@ -79,7 +83,6 @@ class ArmClient(object):
             raise ArmClientError(result)
 
         self.wait_for_deployment_complete(resource_id, '2019-10-01')
-
         return result 
 
     def put_resource(self, resource_id, resource_json, api_version):
@@ -101,8 +104,8 @@ class ArmClient(object):
             # incase of failure return string as error
             raise ArmClientError(result)
 
+        self.wait_for_deployment_complete(resource_id, api_version)
         return result 
-
 
     def get_resource(self, resource_id, api_version):
         url = self.base_url + resource_id + '?api-version=' + api_version
