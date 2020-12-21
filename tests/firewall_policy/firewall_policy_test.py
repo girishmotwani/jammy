@@ -72,12 +72,14 @@ class TestFirewallPolicy:
         net_rule.destination_ports = ["53"]
         net_rule.ip_protocols = [FirewallPolicyRuleNetworkProtocol.udp]
 
-        allow_action = FirewallPolicyFilterRuleCollectionAction()
-        allow_action.type = "ALLOW"
+        
         rcg = FirewallPolicyRuleCollectionGroup()
         rcg.priority = 200
         rcg.rule_collections = []
+        
         rc = FirewallPolicyFilterRuleCollection()
+        allow_action = FirewallPolicyFilterRuleCollectionAction()
+        allow_action.type = "ALLOW"
         rc.rule_collection_type = 'FirewallPolicyFilterRuleCollection'
         rc.name = "testRuleCollection01"
         rc.priority = 1000
@@ -86,10 +88,7 @@ class TestFirewallPolicy:
         rcg.rule_collections.append(rc)
 
         resourceJson = json.dumps(rcg.serialize())
-
         resp = self.cl.put_resource(rcg_id, resourceJson, version.VERSION)
-
-
 
         # now associate the firewall policy with the firewall deployed.
         fw_resourceId = '/subscriptions/' + subscriptionId + '/resourceGroups/' + resourceGroup + '/providers/Microsoft.Network/azureFirewalls/' + 'firewall1' 
