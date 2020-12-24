@@ -56,13 +56,14 @@ class TestFirewallPolicy:
         fp = FirewallPolicy()
         fp.location = location
         fp.resourceGroup = resourceGroup
+        resource_group_id = '/subscriptions/' + subscriptionId + '/resourceGroups/' + resourceGroup 
         
         # first deploy the ARM template 
         template_file = os.path.join(os.path.dirname(__file__), 'templates', 'firewallPolicySandbox.json')
         self.cl.deploy_template(subscriptionId, "test-deployment", resourceGroup, location, template_file)
         
         # create firewall policy 
-        resourceId = '/subscriptions/' + subscriptionId + '/resourceGroups/' + resourceGroup + '/providers/Microsoft.Network/firewallPolicies/jammyFP02'
+        resourceId = resource_group_id + '/providers/Microsoft.Network/firewallPolicies/jammyFP02'
         resp = self.put_firewall_policy(resourceId, fp)
 
         # create a rule collection group
@@ -95,7 +96,7 @@ class TestFirewallPolicy:
         resp = self.cl.put_resource(rcg_id, resourceJson, version.VERSION)
 
         # now associate the firewall policy with the firewall deployed.
-        fw_resourceId = '/subscriptions/' + subscriptionId + '/resourceGroups/' + resourceGroup + '/providers/Microsoft.Network/azureFirewalls/' + 'firewall1' 
+        fw_resourceId = resource_group_id + '/providers/Microsoft.Network/azureFirewalls/' + 'firewall1' 
         resp = self.cl.get_resource(fw_resourceId , "2020-07-01")
         firewall = AzureFirewall.from_dict(json.loads(resp))
 
@@ -110,7 +111,6 @@ class TestFirewallPolicy:
         assert len(updated_policy.firewalls) > 0 , "No firewalls associated with firewall policy"
         #update the policy rule settings
 
-        import pdb ; pdb.set_trace()
         ftp_rule = NetworkRule()
         ftp_rule.name = 'ftp'
         ftp_rule.source_addresses = ['10.1.0.0/24']
@@ -126,6 +126,12 @@ class TestFirewallPolicy:
 
         resourceJson = json.dumps(rcg.serialize())
         resp = self.cl.put_resource(rcg_id, resourceJson, version.VERSION)
+
+        assert (self.get_firewall_policy(resourceId)).provisioning_state == 'Succeeded', "Policy in failed state post update"
+
+        #finally delete the resource group
+        self.cl.delete_resource(resource_group_id, '2019-10-01')
+
         
         
 
