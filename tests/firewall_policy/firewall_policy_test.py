@@ -132,6 +132,98 @@ class TestFirewallPolicy:
         #finally delete the resource group
         self.cl.delete_resource(resource_group_id, '2019-10-01')
 
+    def test_firewall_policy_inheritence(self, subscriptionId, location, resourceGroup):
+        resourceGroup = "inheritence" + resourceGroup
+
+        self.cl = ArmClient()
+        self.rg = self.cl.create_resource_group(subscriptionId, resourceGroup, location)
+
+        fp = FirewallPolicy()
+        fp.location = location
+        fp.resourceGroup = resourceGroup
+        resource_group_id = '/subscriptions/' + subscriptionId + '/resourceGroups/' + resourceGroup
+        
+        # first deploy the ARM template 
+        template_file = os.path.join(os.path.dirname(__file__), 'templates', 'firewallPolicySandbox.json')
+        self.cl.deploy_template(subscriptionId, "test-deployment-inheritence", resourceGroup, location, template_file)
+        
+        # create base firewall policy 
+        resourceId = resource_group_id + '/providers/Microsoft.Network/firewallPolicies/jammyFPBase'
+        childPolicyId = resource_group_id + '/providers/Microsoft.Network/firewallPolicies/jammyFPChild'
+        resp = self.put_firewall_policy(resourceId, fp)
+
+        # create a rule collection group
+        rcg_id = resourceId + '/ruleCollectionGroups/rcg01'
+
+        net_rule = NetworkRule()
+        net_rule.name = 'google_dns'
+        net_rule.source_addresses = ['10.1.0.0/24']
+        net_rule.destination_addresses = ['8.8.8.8', '8.8.8.4']
+        net_rule.destination_ports = ["53"]
+        net_rule.ip_protocols = [FirewallPolicyRuleNetworkProtocol.udp]
+        rule_list = []
+        rule_list.append(net_rule)
+        
+        rcg = FirewallPolicyRuleCollectionGroup()
+        rcg.priority = 200
+        rcg.rule_collections = []
+        
+        rc = FirewallPolicyFilterRuleCollection()
+        allow_action = FirewallPolicyFilterRuleCollectionAction()
+        allow_action.type = "ALLOW"
+        rc.rule_collection_type = 'FirewallPolicyFilterRuleCollection'
+        rc.name = "testRuleCollection01"
+        rc.priority = 1000
+        rc.action = allow_action
+        rc.rules = rule_list
+        rcg.rule_collections.append(rc)
+
+        resourceJson = json.dumps(rcg.serialize())
+        resp = self.cl.put_resource(rcg_id, resourceJson, version.VERSION)
+
+        base_policy_ref = SubResource()
+        base_policy_ref.id = resourceId
+        fp.base_policy = base_policy_ref
+        resp = self.put_firewall_policy(childPolicyId, fp)
+
+        # now associate the firewall policy with the firewall deployed.
+        fw_resourceId = resource_group_id + '/providers/Microsoft.Network/azureFirewalls/' + 'firewall1' 
+        resp = self.cl.get_resource(fw_resourceId , "2020-07-01")
+        firewall = AzureFirewall.from_dict(json.loads(resp))
+
+        policy_ref = SubResource()
+        policy_ref.id = childPolicyId
+        firewall.firewall_policy = policy_ref
+        resp = self.cl.put_resource(firewall.id, json.dumps(firewall.serialize()),  "2020-07-01")
+
+        # verify that the policy is associated with the firewall
+        updated_policy = self.get_firewall_policy(childPolicyId) 
+
+        assert len(updated_policy.firewalls) > 0 , "No firewalls associated with firewall policy"
+        #update the base policy rule settings
+
+        ftp_rule = NetworkRule()
+        ftp_rule.name = 'ftp'
+        ftp_rule.source_addresses = ['10.1.0.0/24']
+        ftp_rule.destination_addresses = ['52.8.4.1', '80.1.18.4']
+        ftp_rule.destination_ports = ["21"]
+        ftp_rule.ip_protocols = [FirewallPolicyRuleNetworkProtocol.tcp]
+
+        rule_list.append(ftp_rule)
+
+        rcg = FirewallPolicyRuleCollectionGroup.from_dict(json.loads(self.cl.get_resource(rcg_id, version.VERSION)))
+        rc = rcg.rule_collections[0]
+        rc.rules = rule_list 
+
+        resourceJson = json.dumps(rcg.serialize())
+        resp = self.cl.put_resource(rcg_id, resourceJson, version.VERSION)
+
+        assert (self.get_firewall_policy(resourceId)).provisioning_state == 'Succeeded', "Policy in failed state post update"
+
+        #finally delete the resource group
+        self.cl.delete_resource(resource_group_id, '2019-10-01')
+
+        
         
         
 
