@@ -66,7 +66,7 @@ VERSION = "2020-07-01"
 ```
 Note choose the version that corresponds to your swagger file.
 
-4. Also update __init__.py to import VERSION from version.py by adding the following line
+4. Also update "__init__.py" to import VERSION from version.py by adding the following line
 ```
  from .version import VERSION
 ```
