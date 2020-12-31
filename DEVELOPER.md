@@ -36,7 +36,7 @@ You need to install node and autorest using the following links:
 * Next increase the max memory available to run autorest and other node commands by setting the environment variable 
    setx NODE_OPTIONS --max-old-space-size=8192
   
-** IMPORTANT - close the command window for the settings to take effect and open a new window to run the autorest command to generate the models for your resource.
+** IMPORTANT - close the command window for the settings to take effect and open a new window to run the autorest command to generate the models for your resource. **
 
 
 ### Generating and Importing your resource models

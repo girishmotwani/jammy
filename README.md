@@ -21,7 +21,7 @@ Refer to the [Developer Guide](DEVELOPER.md) to learn about Jammy internals
 $ git clone
 ```
 
-**Set the environment variable AZURE_SUBSCRIPTION_ID to the Azure Subscription
+**Set the environment variable AZURE_SUBSCRIPTION_ID to the Azure Subscription**
 ```
 $ export AZURE_SUBSCRIPTION_ID=<subscriptionId> (Linux)
 ```
