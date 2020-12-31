@@ -44,7 +44,7 @@ You need to install node and autorest using the following links:
 
 ### Generating and Importing your resource models
 
-In a new command window, run the following autorest command with the swagger spec for your resource as the input. Note that if there are multiple json files which are 
+1. In a new command window, run the following autorest command with the swagger spec for your resource as the input. Note that if there are multiple json files which are 
 used to define your resource, for example most networking resource use network.json, all the needed files should be in the current directory.
 ```
 C:\az\work\swagger>autorest --input-file=ipGroups.json --python
@@ -55,4 +55,19 @@ WARNING: AutoRest has not been tested with Node versions greater than v13.
 AutoRest code generation utility [cli version: 3.0.6173; node: v14.15.0, max-memory: 8192 gb]
 (C) 2018 Microsoft Corporation.
 https://aka.ms/autorest
+
+
+2. You should see a new folder named "generated" in the current directory. Copy the 'generated/network_management_client/models/' folder to 
+'lib/jammy/models/<resource-name>' path in jammy
+
+3. Add a new file named version.py with contents as below to this path
+```
+VERSION = "2020-07-01" 
+```
+Note choose the version that corresponds to your swagger file.
+
+4. Also update __init__.py to import VERSION from version.py by adding the following line
+```
+ from .version import VERSION
+```
 
