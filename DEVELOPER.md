@@ -21,3 +21,35 @@ for the Azure resources you want to test.
 The test folder contains the test cases for the resources to be tested. Since Jammy uses the pytest framework,
 the tests need to conform to the requirements of pytest for identifying test classes/methods.
 
+## Adding your resource to Jammy
+
+Adding your resource models to jammy to enable writing tests is simple and uses the autorest utility to
+generate models for your resource from the swagger speciication.
+
+### Pre-requisites:
+You need to install node and autorest using the following links:
+
+* Node [nodejs](https://nodejs.org/en/download/)
+* autorest
+   npm install -g https://github.com/Azure/autorest/releases/download/autorest-3.0.6173/autorest-3.0.6173.tgz
+
+* Next increase the max memory available to run autorest and other node commands by setting the environment variable 
+   setx NODE_OPTIONS --max-old-space-size=8192
+  
+** IMPORTANT - close the command window for the settings to take effect and open a new window to run the autorest command to generate the models for your resource.
+
+
+### Generating and Importing your resource models
+
+In a new command window, run the following autorest command with the swagger spec for your resource as the input. Note that if there are multiple json files which are 
+used to define your resource, for example most networking resource use network.json, all the needed files should be in the current directory.
+```
+C:\az\work\swagger>autorest --input-file=ipGroups.json --python
+
+```
+WARNING: AutoRest has not been tested with Node versions greater than v13.
+
+AutoRest code generation utility [cli version: 3.0.6173; node: v14.15.0, max-memory: 8192 gb]
+(C) 2018 Microsoft Corporation.
+https://aka.ms/autorest
+
