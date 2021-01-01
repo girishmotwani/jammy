@@ -9,3 +9,4 @@ pydocstyle==1.0.0
 pep8-naming==0.3.3
 flake8==3.8.4
 backoff==1.10.0
+azure-core==1.9.0

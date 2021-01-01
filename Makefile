@@ -26,3 +26,9 @@ test: ## Run FWM feature tests in one job
 	python3 -m pytest -s tests/firewall_policy/firewall_policy_test.py \
 	       	--resourceGroup test01RG --subscriptionId $(SUBSCRIPTION_ID) \
 		--location westus
+
+test-vwan: ## Run vWan tests
+	@echo $(DISPLAY_BOLD)"==> Running virtual WAN tests"$(DISPLAY_RESET)
+	python3 -m pytest -s tests/virtualWan/virtual_wan_test.py \
+	       	--resourceGroup testWan01RG --subscriptionId $(SUBSCRIPTION_ID) \
+		--location westus
