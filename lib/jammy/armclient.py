@@ -2,9 +2,13 @@
 
 import backoff
 import json
+import logging
 import sched, time
 import subprocess
 import uuid
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 class ArmClientError(Exception):
     """
@@ -30,11 +34,11 @@ class ArmClient(object):
         return json.dumps(body)
 
     def cmd_wrapper(self, cmd):
-        print('Running subprocess with command %s' % cmd )
+        logger.debug('Running subprocess with command %s' % cmd )
         try:
             output = subprocess.check_output(cmd, subprocess.STDOUT, shell=True)
         except subprocess.CalledProcessError as e:
-            print('cmd_wrapper failed for command "%s" and gave '
+            logger.error('cmd_wrapper failed for command "%s" and gave '
                 'return code "%s" and output "%s"'
                 % (cmd, e.returncode, e.output))
             raise

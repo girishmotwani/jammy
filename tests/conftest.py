@@ -1,5 +1,17 @@
+"""
+This is the base conftest.py file for Jammy.
+
+conftest.py files in subdirectories will override.
+
+"""
+
+import logging
 import pytest
 
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s %(levelname)s %(module)s: '
+                           '%(message)s', datefmt="%H:%M:%S")
+logger = logging.getLogger(__name__)
 
 def pytest_addoption(parser):
     parser.addoption("--subscriptionId", action="store", default="f6cb8187-b300-4c2d-9b23-c00e7e98d799")

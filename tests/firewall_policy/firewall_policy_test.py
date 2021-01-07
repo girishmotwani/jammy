@@ -2,6 +2,7 @@
 Tests for firewall policy in Jammy
 """
 
+import logging
 import json
 import os
 import pytest
@@ -11,7 +12,8 @@ from jammy.models.firewallPolicy import version
 
 from jammy.models.azurefirewall import AzureFirewall
 
-
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 class TestFirewallPolicy:
 
@@ -61,7 +63,8 @@ class TestFirewallPolicy:
         # first deploy the ARM template 
         template_file = os.path.join(os.path.dirname(__file__), 'templates', 'firewallPolicySandbox.json')
         self.cl.deploy_template(subscriptionId, "test-deployment", resourceGroup, location, template_file)
-        
+       
+        logger.info("test_create_delete_vnet_fw: Step 1: Deploying sandbox template succeeded")
         # create firewall policy 
         resourceId = resource_group_id + '/providers/Microsoft.Network/firewallPolicies/jammyFP02'
         resp = self.put_firewall_policy(resourceId, fp)
@@ -95,6 +98,7 @@ class TestFirewallPolicy:
         resourceJson = json.dumps(rcg.serialize())
         resp = self.cl.put_resource(rcg_id, resourceJson, version.VERSION)
 
+        logger.info("test_create_delete_vnet_fw: Step 2: Create FP with RuleCollectionGroup succeeded")
         # now associate the firewall policy with the firewall deployed.
         fw_resourceId = resource_group_id + '/providers/Microsoft.Network/azureFirewalls/' + 'firewall1' 
         resp = self.cl.get_resource(fw_resourceId , "2020-07-01")
@@ -109,6 +113,7 @@ class TestFirewallPolicy:
         updated_policy = self.get_firewall_policy(resourceId) 
 
         assert len(updated_policy.firewalls) > 0 , "No firewalls associated with firewall policy"
+        logger.info("test_create_delete_vnet_fw: Step 3: Associate FP with Firewall succeeded")
         #update the policy rule settings
 
         ftp_rule = NetworkRule()
@@ -128,6 +133,7 @@ class TestFirewallPolicy:
         resp = self.cl.put_resource(rcg_id, resourceJson, version.VERSION)
 
         assert (self.get_firewall_policy(resourceId)).provisioning_state == 'Succeeded', "Policy in failed state post update"
+        logger.info("test_create_delete_vnet_fw: Step 4: Update Firewall Policy succeeded")
 
         #finally delete the resource group
         self.cl.delete_resource(resource_group_id, '2019-10-01')
