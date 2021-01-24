@@ -11,3 +11,4 @@ flake8==3.8.4
 backoff==1.10.0
 azure-core==1.9.0
 msrest==0.6.19
+pytest-html==3.1.1
