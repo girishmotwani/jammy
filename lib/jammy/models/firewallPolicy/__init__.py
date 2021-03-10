@@ -26,6 +26,7 @@ try:
     from .resource_py3 import Resource
     from .cloud_error_body_py3 import CloudErrorBody
     from .cloud_error_py3 import CloudError, CloudErrorException
+    from .version import VERSION
 except (SyntaxError, ImportError):
     from .sub_resource import SubResource
     from .firewall_policy_threat_intel_whitelist import FirewallPolicyThreatIntelWhitelist

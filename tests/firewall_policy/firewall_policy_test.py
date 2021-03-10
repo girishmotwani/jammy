@@ -33,6 +33,15 @@ class TestFirewallPolicy:
         resp = self.cl.put_resource(resource_id, resourceJson, version.VERSION)
         return resp
 
+    def create_network_rule(self, rule_name, src_addresses, dest_addresses, ports, protocols):
+        net_rule = NetworkRule()
+        net_rule.name = rule_name 
+        net_rule.source_addresses = src_addresses
+        net_rule.destination_addresses = dest_addresses
+        net_rule.destination_ports = ports 
+        net_rule.ip_protocols = protocols 
+        return net_rule 
+
     def test_policy_with_ruleCollectionGroup(self, setup_rg, subscriptionId, location, resourceGroup):
         fp = FirewallPolicy()
         fp.location = location
@@ -70,7 +79,46 @@ class TestFirewallPolicy:
         resp = self.put_firewall_policy(resourceId, fp)
 
         # create a rule collection group
-        rcg_id = resourceId + '/ruleCollectionGroups/rcg01'
+        rcg_resourceId = resourceId + '/ruleCollectionGroups/rcg01'
+        rcg = FirewallPolicyRuleCollectionGroup()
+        rcg.priority = 200
+        rcg.rule_collections = []
+        
+        rc = FirewallPolicyRuleCollection()
+        allow_action = FirewallPolicyFilterRuleCollectionAction()
+        allow_action.type = "ALLOW"
+        rc.name = "testRuleCollection01"
+        rc.priority = 1000
+        rc.action = allow_action
+        rc.rule_collection_type = 'FirewallPolicyFilterRuleCollection'
+        rule_list = []
+        rule_list.append(self.create_network_rule("rule1", ["10.1.0.0/16"], ["8.8.8.8"], ["53"],[FirewallPolicyRuleNetworkProtocol.udp]))
+        rule_list.append(self.create_network_rule("rule2", ["10.1.0.0/16"], ["8.8.8.4"], ["53"],[FirewallPolicyRuleNetworkProtocol.udp]))
+        rule_list.append(self.create_network_rule("rule3", ["10.1.0.0/16"], ["8.8.8.4"], ["443"],[FirewallPolicyRuleNetworkProtocol.tcp]))
+        rc.rules = rule_list
+        
+        rcg.rule_collections.append(rc)
+        resourceJson = json.dumps(rcg.serialize())
+        resp = self.cl.put_resource(rcg_resourceId, resourceJson, version.VERSION)
+
+        logger.info("test_create_delete_vhub_fw: Step 2: Create FP with RuleCollectionGroup succeeded")
+        # now associate the firewall policy with the firewall deployed.
+        fw_resourceId = resource_group_id + '/providers/Microsoft.Network/azureFirewalls/' + 'firewall1' 
+        resp = self.cl.get_resource(fw_resourceId , "2020-07-01")
+        firewall = AzureFirewall.from_dict(json.loads(resp))
+
+        policy_ref = SubResource()
+        policy_ref.id = resourceId
+        firewall.firewall_policy = policy_ref
+        resp = self.cl.put_resource(firewall.id, json.dumps(firewall.serialize()),  "2020-07-01")
+
+        # verify that the policy is associated with the firewall
+        updated_policy = self.get_firewall_policy(resourceId) 
+        assert len(updated_policy.firewalls) > 0 , "No firewalls associated with firewall policy"
+        logger.info("test_create_delete_vhub_fw: Step 3: Associate FP with Firewall succeeded")
+
+        #finally delete the resource group
+        self.cl.delete_resource(resource_group_id, '2019-10-01')
 
     def test_create_delete_vnet_fw(self, setup_rg, subscriptionId, location, resourceGroup):
         fp = FirewallPolicy()
