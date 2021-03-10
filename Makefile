@@ -18,7 +18,7 @@ install: ## Install python modules
 auth-and-test: ## Run FWM feature tests in one job
 	armclient.exe login
 	@echo $(DISPLAY_BOLD)"==> Running Firewall Policy tests"$(DISPLAY_RESET)
-	python -m pytest --html=pytest_report.html --self-contained-html --capture=sys -rF tests/firewall_policy/firewall_policy_test.py \
+	python -m pytest --html=jammy_fwmtest_report.html --self-contained-html --capture=sys -rF tests/firewall_policy/firewall_policy_test.py \
 	       	--resourceGroup test01RG --subscriptionId $(SUBSCRIPTION_ID) \
 		--location westus
 test: ## Run FWM feature tests in one job

@@ -54,6 +54,24 @@ class TestFirewallPolicy:
 
         updated_policy = self.get_firewall_policy(resourceId)
 
+    def test_create_delete_vhub_fw(self, setup_rg, subscriptionId, location, resourceGroup):
+        fp = FirewallPolicy()
+        fp.location = location
+        fp.resourceGroup = resourceGroup
+        resource_group_id = '/subscriptions/' + subscriptionId + '/resourceGroups/' + resourceGroup 
+        
+        # first deploy the ARM template 
+        template_file = os.path.join(os.path.dirname(__file__), 'templates', 'firewallPolicyVhubSandbox.json')
+        self.cl.deploy_template(subscriptionId, "test-deployment-vhub", resourceGroup, location, template_file)
+       
+        logger.info("test_create_delete_vhub_fw: Step 1: Deploying sandbox template succeeded")
+        # create firewall policy 
+        resourceId = resource_group_id + '/providers/Microsoft.Network/firewallPolicies/jammyFP03'
+        resp = self.put_firewall_policy(resourceId, fp)
+
+        # create a rule collection group
+        rcg_id = resourceId + '/ruleCollectionGroups/rcg01'
+
     def test_create_delete_vnet_fw(self, setup_rg, subscriptionId, location, resourceGroup):
         fp = FirewallPolicy()
         fp.location = location
