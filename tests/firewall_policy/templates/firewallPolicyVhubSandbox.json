@@ -162,7 +162,7 @@
                     "apiVersion": "2020-06-01",
                     "name": "Hub-01/hub-spoke",
                     "dependsOn": [
-                        "[resourceId('Microsoft.Network/azureFirewalls', 'AzfwTest')]",
+                        "[resourceId('Microsoft.Network/azureFirewalls', variables('firewallName'))]",
                         "[resourceId('Microsoft.Network/virtualHubs', 'Hub-01')]",
                         "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
                         "[resourceId('Microsoft.Network/virtualHubs/hubRouteTables', 'Hub-01', 'RT_VNet')]"
@@ -266,7 +266,7 @@
                 {
                     "type": "Microsoft.Network/azureFirewalls",
                     "apiVersion": "2020-06-01",
-                    "name": "AzfwTest",
+                    "name": "[variables('firewallName')]",
                     "location": "[parameters('location')]",
                     "dependsOn": [
                         "[resourceId('Microsoft.Network/virtualHubs', 'Hub-01')]",
@@ -534,7 +534,7 @@
       "name": "Hub-01/RT_VNet",
       "location": "[parameters('location')]",
       "dependsOn": [
-        "[resourceId('Microsoft.Network/azureFirewalls', 'AzfwTest')]"
+        "[resourceId('Microsoft.Network/azureFirewalls', variables('firewallName'))]"
       ],
       "properties": {
         "routes": [
@@ -545,7 +545,7 @@
               "10.0.1.0/24"
             ],
             "nextHopType": "ResourceId",
-            "nextHop": "[resourceId('Microsoft.Network/azureFirewalls', 'AzfwTest')]"
+            "nextHop": "[resourceId('Microsoft.Network/azureFirewalls', variables('firewallName'))]"
           },
           {
             "name": "InternetToFirewall",
@@ -554,7 +554,7 @@
               "0.0.0.0/0"
             ],
             "nextHopType": "ResourceId",
-            "nextHop": "[resourceId('Microsoft.Network/azureFirewalls', 'AzfwTest')]"
+            "nextHop": "[resourceId('Microsoft.Network/azureFirewalls', variables('firewallName'))]"
           }
         ],
         "labels": [
