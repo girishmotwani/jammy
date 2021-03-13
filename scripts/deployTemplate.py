@@ -3,6 +3,10 @@
 import argparse
 from jammy.armclient import ArmClient
 
+## Usage
+# python3 deployTemplate.py --resourceGroup test04RG --subscriptionId f6cb8187-b300-4c2d-9b23-c00e7e98d799 --filePath ../tests/firewall_policy/templates/firewallPolicySandbox.json
+###
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--location', required=False, default= "eastus",
