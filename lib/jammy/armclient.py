@@ -108,7 +108,7 @@ class ArmClient(object):
             # incase of failure return string as error
             raise ArmClientError(result)
 
-        #self.wait_for_deployment_complete(resource_id, api_version)
+        self.wait_for_deployment_complete(resource_id, api_version)
         return result 
 
     def get_resource(self, resource_id, api_version):
