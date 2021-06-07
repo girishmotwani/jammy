@@ -22,7 +22,7 @@ def main():
 
     rg = cl.create_resource_group(args.subscriptionId, args.resourceGroup, args.location)
     resource_group_id = '/subscriptions/' + args.subscriptionId + '/resourceGroups/' + args.resourceGroup 
-    cl.deploy_template(args.subscriptionId, args.resourceGroup, 'TemplateTest', args.location, args.filePath)
+    cl.deploy_template(args.subscriptionId, "test-deployment", args.resourceGroup, args.location, args.filePath)
 
 if __name__ == '__main__':
     main()
