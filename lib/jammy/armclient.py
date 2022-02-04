@@ -29,6 +29,10 @@ class ArmClient(object):
     def base_url(self):
         return self._base_url
 
+    @base_url.setter
+    def base_url(self, value):
+        self._base_url = value
+
     def get_resource_group_body(self, location):
         body = { "location": location}
         return json.dumps(body)
@@ -93,10 +97,13 @@ class ArmClient(object):
         url = self.base_url + resource_id + '?api-version=' + api_version
         headers = ' ' + '-h "Referer: ' + url + '"'
 
-        # escape the quotes in resource json string
-        resource_json = resource_json.replace('"', r'\"')
+        # write the json to a file
+        with open('tempResource.json', 'w') as fp:
+            fp.write(resource_json)
+            # escape the quotes in resource json string
+            #resource_json = resource_json.replace('"', r'\"')
         try:
-            cmd = self._armclient + " put " + url + " " + '"' + resource_json + '"' + headers
+            cmd = self._armclient + " put " + url + " " + '@' + "tempResource.json" 
             output = self.cmd_wrapper(cmd)
 
             result = output.decode("utf-8")
