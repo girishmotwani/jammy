@@ -8,7 +8,6 @@ import os
 import pytest
 from jammy.armclient import ArmClient
 from jammy.models.firewallPolicy import *
-from jammy.models.firewallPolicy import version
 
 from jammy.models.azurefirewall import AzureFirewall
 
@@ -25,12 +24,12 @@ class TestBasicSkuFirewall:
         self.rg = self.cl.create_resource_group(subscriptionId, resourceGroup, location)
 
     def get_firewall_policy(self, resource_id):
-        resp = self.cl.get_resource(resource_id, version.VERSION)
+        resp = self.cl.get_resource(resource_id, "2021-05-01")
         return FirewallPolicy.from_dict(json.loads(resp))
 
     def put_firewall_policy(self, resource_id, policy):
         resourceJson = json.dumps(policy.serialize())
-        resp = self.cl.put_resource(resource_id, resourceJson, version.VERSION)
+        resp = self.cl.put_resource(resource_id, resourceJson, "2021-05-01")
         return resp
 
     def create_network_rule(self, rule_name, src_addresses, dest_addresses, ports, protocols):
@@ -89,7 +88,7 @@ class TestBasicSkuFirewall:
         rcg.rule_collections.append(rc)
 
         resourceJson = json.dumps(rcg.serialize())
-        resp = self.cl.put_resource(rcg_id, resourceJson, version.VERSION)
+        resp = self.cl.put_resource(rcg_id, resourceJson, "2021-05-01")
 
         logger.info("test_create_delete_vnet_fw: Step 2: Create FP with RuleCollectionGroup succeeded")
         # now associate the firewall policy with the firewall deployed.
@@ -118,12 +117,12 @@ class TestBasicSkuFirewall:
 
         rule_list.append(ftp_rule)
 
-        rcg = FirewallPolicyRuleCollectionGroup.from_dict(json.loads(self.cl.get_resource(rcg_id, version.VERSION)))
+        rcg = FirewallPolicyRuleCollectionGroup.from_dict(json.loads(self.cl.get_resource(rcg_id, "2021-05-01")))
         rc = rcg.rule_collections[0]
         rc.rules = rule_list 
 
         resourceJson = json.dumps(rcg.serialize())
-        resp = self.cl.put_resource(rcg_id, resourceJson, version.VERSION)
+        resp = self.cl.put_resource(rcg_id, resourceJson, "2021-05-01")
 
         assert (self.get_firewall_policy(resourceId)).provisioning_state == 'Succeeded', "Policy in failed state post update"
         logger.info("test_create_delete_vnet_fw: Step 4: Update Firewall Policy succeeded")
