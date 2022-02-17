@@ -41,9 +41,9 @@ class TestBasicSkuFirewall:
         net_rule.ip_protocols = protocols 
         return net_rule 
 
-    def test_create_delete_basic_fw(self, setup_rg, subscriptionId, location, resourceGroup):
+    def test_create_delete_basic_fw(self, setup_rg, subscriptionId, location, policyLocation, resourceGroup):
         fp = FirewallPolicy()
-        fp.location = location
+        fp.location = policyLocation
         fp.resourceGroup = resourceGroup
 
         sku = FirewallPolicySku()

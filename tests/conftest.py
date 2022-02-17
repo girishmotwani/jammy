@@ -30,5 +30,9 @@ def location(request):
     return request.config.getoption("--location")
 
 @pytest.fixture
+def location(request):
+    return request.config.getoption("--policyLocation")
+
+@pytest.fixture
 def resourceGroup(request):
     return request.config.getoption("--resourceGroup")
