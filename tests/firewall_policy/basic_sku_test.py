@@ -129,3 +129,51 @@ class TestBasicSkuFirewall:
 
         #finally delete the resource group
         self.cl.delete_resource(resource_group_id, '2019-10-01')
+
+    def test_basic_sku_policy_inheritance(self, subscriptionId, location, policyLocation, resourceGroup):
+        resourceGroup = "inheritance" + resourceGroup
+
+        self.cl = ArmClient()
+        self.rg = self.cl.create_resource_group(subscriptionId, resourceGroup, location)
+
+        fp = FirewallPolicy()
+        fp.location = policyLocation
+        fp.resourceGroup = resourceGroup
+        sku = FirewallPolicySku()
+        sku.tier = "Basic"
+        fp.sku = sku
+        
+        resource_group_id = '/subscriptions/' + subscriptionId + '/resourceGroups/' + resourceGroup
+        
+        # first deploy the ARM template 
+        template_file = os.path.join(os.path.dirname(__file__), 'templates', 'firewallBasicSkuSandbox.json')
+        self.cl.deploy_template(subscriptionId, "test-deployment-inheritance", resourceGroup, location, template_file)
+        
+        # create base firewall policy 
+        resourceId = resource_group_id + '/providers/Microsoft.Network/firewallPolicies/jammyFPBase'
+        childPolicyId = resource_group_id + '/providers/Microsoft.Network/firewallPolicies/jammyFPChild'
+        resp = self.put_firewall_policy(resourceId, fp)
+        
+        # create child policy, with reference of base policy resource set
+        base_policy_ref = SubResource()
+        base_policy_ref.id = resourceId
+        fp.base_policy = base_policy_ref
+        resp = self.put_firewall_policy(childPolicyId, fp)
+        
+        # now associate the firewall policy with the firewall deployed.
+        fw_resourceId = resource_group_id + '/providers/Microsoft.Network/azureFirewalls/' + 'firewall1' 
+        resp = self.cl.get_resource(fw_resourceId , "2020-07-01")
+        firewall = AzureFirewall.from_dict(json.loads(resp))
+
+        policy_ref = SubResource()
+        policy_ref.id = childPolicyId
+        firewall.firewall_policy = policy_ref
+        resp = self.cl.put_resource(firewall.id, json.dumps(firewall.serialize()),  "2020-07-01")
+
+        # verify that the policy is associated with the firewall
+        updated_policy = self.get_firewall_policy(childPolicyId) 
+
+        assert len(updated_policy.firewalls) > 0 , "No firewalls associated with firewall policy"
+        
+        #finally delete the resource group
+        self.cl.delete_resource(resource_group_id, '2019-10-01')
