@@ -6,7 +6,7 @@ import logging
 import json
 import os
 import pytest
-from jammy.armclient import ArmClient
+from jammy.armclient import *
 from jammy.models.firewallPolicy import *
 
 from jammy.models.azurefirewall import AzureFirewall
@@ -177,3 +177,32 @@ class TestBasicSkuFirewall:
         
         #finally delete the resource group
         self.cl.delete_resource(resource_group_id, '2019-10-01')
+
+    def test_basic_sku_policy_inheritance_error(self, subscriptionId, location, policyLocation, resourceGroup):
+        resourceGroup = "inherit_error" + resourceGroup
+
+        #create resource group
+        self.cl = ArmClient()
+        self.rg = self.cl.create_resource_group(subscriptionId, resourceGroup, location)
+
+        fp = FirewallPolicy()
+        fp.location = policyLocation
+        fp.resourceGroup = resourceGroup
+        
+        resource_group_id = '/subscriptions/' + subscriptionId + '/resourceGroups/' + resourceGroup
+        
+        # create base firewall policy with Standard SKU 
+        resourceId = resource_group_id + '/providers/Microsoft.Network/firewallPolicies/jammyFPBase'
+        childPolicyId = resource_group_id + '/providers/Microsoft.Network/firewallPolicies/jammyFPChild'
+        resp = self.put_firewall_policy(resourceId, fp)
+        
+        # create child policy, with reference of base policy resource set
+        base_policy_ref = SubResource()
+        base_policy_ref.id = resourceId
+        fp.base_policy = base_policy_ref
+        sku = FirewallPolicySku()
+        sku.tier = "Basic"
+        fp.sku = sku
+        with pytest.raises(ArmClientError):
+            resp = self.put_firewall_policy(childPolicyId, fp)
+        
