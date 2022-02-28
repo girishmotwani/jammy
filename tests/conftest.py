@@ -18,6 +18,9 @@ def pytest_addoption(parser):
     parser.addoption("--location", action="store", default="eastus")
     parser.addoption("--policyLocation", action="store", default="eastus")
     parser.addoption("--resourceGroup", action="store", default="testRCG01")
+    parser.addoption("--numrcg", action="store", default="1")
+    parser.addoption("--numrc", action="store", default="1")
+    parser.addoption("--numrules", action="store", default="1")
 
 
 
@@ -37,3 +40,15 @@ def policyLocation(request):
 @pytest.fixture
 def resourceGroup(request):
     return request.config.getoption("--resourceGroup")
+
+@pytest.fixture
+def num_rules(request):
+    return request.config.getoption("--numrules")
+
+@pytest.fixture
+def num_rcg(request):
+    return request.config.getoption("--numrcg")
+
+@pytest.fixture
+def num_rc(request):
+    return request.config.getoption("--numrc")

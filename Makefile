@@ -32,3 +32,9 @@ test-vwan: ## Run vWan tests
 	python -m pytest --html=jammy_vwantest_report.html --self-contained-html --capture=sys -rF tests/virtualWan/virtual_wan_test.py \
 	       	--resourceGroup testWan01RG --subscriptionId $(SUBSCRIPTION_ID) \
 		--location westus
+
+test-fw-ipg: ## Run FWM IP Groups test: Creates rules that have IP Groups in src and dst
+	@echo $(DISPLAY_BOLD)"==> Running Firewall Policy IP Group tests"$(DISPLAY_RESET)
+	python -m pytest --html=jammy_fwmtest_report.html --self-contained-html --capture=sys -rF tests/firewall_policy/firewall_policy_test.py -k test_create_delete_vnet_fw_with_ipg \
+	       	--resourceGroup testfwIPG --subscriptionId $(SUBSCRIPTION_ID)  --numrcg 5 --numrc 2  --numrules 2 \
+		--location eastus2euap
