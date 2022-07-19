@@ -1,0 +1,768 @@
+{
+  "properties": {
+    "priority": 300,
+    "ruleCollections": [
+      {
+        "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
+        "action": {
+          "type": "Allow"
+        },
+        "rules": [
+          {
+            "ruleType": "ApplicationRule",
+            "name": "WindowsUpdates",
+            "protocols": [
+              {
+                "protocolType": "Http",
+                "port": 80
+              },
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [
+              "WindowsUpdate"
+            ],
+            "webCategories": [],
+            "targetFqdns": [],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.192.3.0/24"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          }
+        ],
+        "name": "IDS_WindowsUpdates",
+        "priority": 100
+      },
+      {
+        "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
+        "action": {
+          "type": "Allow"
+        },
+        "rules": [
+          {
+            "ruleType": "ApplicationRule",
+            "name": "Allow Internet",
+            "protocols": [
+              {
+                "protocolType": "Http",
+                "port": 80
+              },
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "*"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.192.3.4"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          }
+        ],
+        "name": "IDS_Mgmt",
+        "priority": 101
+      },
+      {
+        "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
+        "action": {
+          "type": "Allow"
+        },
+        "rules": [
+          {
+            "ruleType": "ApplicationRule",
+            "name": "AKS_Node-to-API",
+            "protocols": [
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "*.hcp.northcentralus.azmk8s.io"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.192.56.0/22"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          },
+          {
+            "ruleType": "ApplicationRule",
+            "name": "AKS_MCR",
+            "protocols": [
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "mcr.microsoft.com"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.192.56.0/22"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          },
+          {
+            "ruleType": "ApplicationRule",
+            "name": "AKS_MCR-CDN",
+            "protocols": [
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "*.data.mcr.microsoft.com"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.192.56.0/22"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          },
+          {
+            "ruleType": "ApplicationRule",
+            "name": "AKS_AAD",
+            "protocols": [
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "login.microsoftonline.com"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.192.56.0/22"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          },
+          {
+            "ruleType": "ApplicationRule",
+            "name": "AKS_Packages",
+            "protocols": [
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "packages.microsoft.com"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.192.56.0/22"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          },
+          {
+            "ruleType": "ApplicationRule",
+            "name": "AKS_Mirror",
+            "protocols": [
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "acs-mirror.azureedge.net"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.192.56.0/22"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          },
+          {
+            "ruleType": "ApplicationRule",
+            "name": "AKS_management",
+            "protocols": [
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "management.azure.com"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.192.56.0/22"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          }
+        ],
+        "name": "AKS_Rules",
+        "priority": 102
+      },
+      {
+        "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
+        "action": {
+          "type": "Allow"
+        },
+        "rules": [
+          {
+            "ruleType": "ApplicationRule",
+            "name": "All",
+            "protocols": [
+              {
+                "protocolType": "Http",
+                "port": 80
+              },
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "*"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.192.240.36"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          }
+        ],
+        "name": "AllowInternet",
+        "priority": 103
+      },
+      {
+        "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
+        "action": {
+          "type": "Allow"
+        },
+        "rules": [
+          {
+            "ruleType": "ApplicationRule",
+            "name": "avd-defaultapp-2",
+            "protocols": [
+              {
+                "protocolType": "Https",
+                "port": 1688
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "kms.core.windows.net"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.192.8.0/21",
+              "10.193.8.0/21"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          },
+          {
+            "ruleType": "ApplicationRule",
+            "name": "avd-defaultapp-1",
+            "protocols": [
+              {
+                "protocolType": "Http",
+                "port": 80
+              },
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [
+              "WindowsVirtualDesktop",
+              "WindowsUpdate",
+              "WindowsDiagnostics",
+              "MicrosoftActiveProtectionService"
+            ],
+            "webCategories": [],
+            "targetFqdns": [],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.192.8.0/21",
+              "10.193.8.0/21"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          },
+          {
+            "ruleType": "ApplicationRule",
+            "name": "aah-allow-internet",
+            "protocols": [
+              {
+                "protocolType": "Http",
+                "port": 80
+              },
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "*"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.192.8.0/21",
+              "10.193.8.0/21"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          }
+        ],
+        "name": "aah-allow",
+        "priority": 104
+      },
+      {
+        "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
+        "action": {
+          "type": "Allow"
+        },
+        "rules": [
+          {
+            "ruleType": "ApplicationRule",
+            "name": "aag-ncus-101-rg-internet",
+            "protocols": [
+              {
+                "protocolType": "Http",
+                "port": 80
+              },
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "*"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.192.240.128/27"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          },
+          {
+            "ruleType": "ApplicationRule",
+            "name": "aag-ncus-104-rg-internet",
+            "protocols": [
+              {
+                "protocolType": "Http",
+                "port": 80
+              },
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "*"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.192.240.64/27",
+              "10.192.246.6"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          },
+          {
+            "ruleType": "ApplicationRule",
+            "name": "aag-ncus-121-rg-internet",
+            "protocols": [
+              {
+                "protocolType": "Http",
+                "port": 80
+              },
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "*"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.192.244.0/27"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          },
+          {
+            "ruleType": "ApplicationRule",
+            "name": "aag-ncus-100_100-snet-internet",
+            "protocols": [
+              {
+                "protocolType": "Http",
+                "port": 80
+              },
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "*"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.192.240.0/27"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          },
+          {
+            "ruleType": "ApplicationRule",
+            "name": "aag-ncus-100-vnet-azurebackup",
+            "protocols": [
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [
+              "AzureBackup"
+            ],
+            "webCategories": [],
+            "targetFqdns": [],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.192.240.0/20"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          },
+          {
+            "ruleType": "ApplicationRule",
+            "name": "security-test-rg",
+            "protocols": [
+              {
+                "protocolType": "Http",
+                "port": 80
+              },
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "*"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.192.254.100",
+              "10.192.254.101"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          },
+          {
+            "ruleType": "ApplicationRule",
+            "name": "aag-ncus-166-internet",
+            "protocols": [
+              {
+                "protocolType": "Http",
+                "port": 80
+              },
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "*"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.192.246.4"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          },
+          {
+            "ruleType": "ApplicationRule",
+            "name": "aag-ncus-117-rg-internet",
+            "protocols": [
+              {
+                "protocolType": "Http",
+                "port": 80
+              },
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "*"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.192.246.163",
+              "10.192.246.161"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          },
+          {
+            "ruleType": "ApplicationRule",
+            "name": "aagncus099vm-01",
+            "protocols": [
+              {
+                "protocolType": "Http",
+                "port": 80
+              },
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "*"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.192.247.250"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          },
+          {
+            "ruleType": "ApplicationRule",
+            "name": "Azure-AD-Connect-Allow-Out",
+            "protocols": [
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "login.microsoft.com",
+              "secure.aadcdn.microsoftonline-p.com",
+              "login.windows.net",
+              "aadcdn.msftauth.net",
+              "*.blob.core.windows.net",
+              "*.aadconnecthealth.azure.com",
+              "*.adhybridhealth.azure.com",
+              "management.azure.com",
+              "policykeyservice.dc.ad.msft.net",
+              "login.microsoftonline.com",
+              "www.office.com",
+              "aadcdn.msauth.net",
+              "*.microsoftonline.com"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.192.250.11"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          },
+          {
+            "ruleType": "ApplicationRule",
+            "name": "DigitalAgDev-1--abe--iastate--edu-1--to-Internet",
+            "protocols": [
+              {
+                "protocolType": "Http",
+                "port": 80
+              },
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "*"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.192.248.250"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          }
+        ],
+        "name": "aag-allow",
+        "priority": 108
+      },
+      {
+        "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
+        "action": {
+          "type": "Allow"
+        },
+        "rules": [
+          {
+            "ruleType": "ApplicationRule",
+            "name": "aaa-ncus-101-rg-login.iastate.edu",
+            "protocols": [
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "login.iastate.edu"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.192.0.132",
+              "10.192.0.133",
+              "10.192.0.134",
+              "10.192.248.87",
+              "10.192.248.86",
+              "10.192.248.88",
+              "10.192.248.7"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          },
+          {
+            "ruleType": "ApplicationRule",
+            "name": "aaa-ncus-101-rg-iastate.okta.com",
+            "protocols": [
+              {
+                "protocolType": "Https",
+                "port": 443
+              },
+              {
+                "protocolType": "Http",
+                "port": 80
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "iastate.okta.com",
+              "*.oktacdn.com",
+              "iastate.oktapreview.com",
+              "iastate2.oktapreview.com",
+              "iastate3.oktapreview.com",
+              "login.live.com",
+              "*.digicert.com",
+              "login.okta.com"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.192.0.132",
+              "10.192.0.133",
+              "10.192.0.134",
+              "10.192.248.87",
+              "10.192.248.86",
+              "10.192.248.88",
+              "10.192.248.7"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          }
+        ],
+        "name": "aaa-allow",
+        "priority": 107
+      }
+    ],
+    "isCreatedWithoutRuleGroup": false,
+    "provisioningState": "Succeeded"
+  },
+  "id": "/subscriptions/a322104e-95f4-4b4a-9e9a-2cbe46bc9a5c/resourcegroups/isu-aaa-ncus-100-rg/providers/Microsoft.Network/firewallPolicies/isu-aaa-ncus-100-fw-policy/ruleCollectionGroups/DefaultApplicationRuleCollectionGroup",
+  "name": "DefaultApplicationRuleCollectionGroup",
+  "type": "Microsoft.Network/FirewallPolicies/RuleCollectionGroups",
+  "etag": "8cd16c6a-caae-49cf-aa09-980d43ad8450",
+  "location": "northcentralus",
+  "resourceGuid": "250e4367-ac2c-f148-5af5-777850cb4f88",
+  "customerSubscriptionId": "a322104e-95f4-4b4a-9e9a-2cbe46bc9a5c",
+  "resourceGroupName": "isu-aaa-ncus-100-rg",
+  "parentResourceName": "isu-aaa-ncus-100-fw-policy",
+  "lastOperationId": "5d7c0d08-ad2f-4187-b03a-e8688182cbc2",
+  "lastOperationType": "PUT RuleCollectionGroups",
+  "lastOperationClientRequestId": "5cebe5f0-010b-44cc-a351-25533c51c021",
+  "lastOperationHttpStatusCode": "OK",
+  "lastModifiedTime": "2022-02-23T23:25:53.2738396Z",
+  "createdTime": "2021-08-15T15:31:05.3018103Z",
+  "isReference": false,
+  "isDeleted": false
+}

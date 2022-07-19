@@ -1,0 +1,39 @@
+{
+  "properties": {
+    "sku": {
+      "tier": "Standard"
+    },
+    "threatIntelMode": "Alert",
+    "threatIntelWhitelist": {
+      "ipAddresses": []
+    },
+    "snat": {
+      "privateRanges": [
+        "10.0.0.0/8",
+        "172.16.0.0/12",
+        "192.168.0.0/16",
+        "100.64.0.0/10"
+      ]
+    },
+    "childPolicies": [],
+    "ruleCollectionGroups": [
+      {
+        "id": "/subscriptions/7a06e974-7329-4485-87e7-3211b06c15aa/resourcegroups/NortonLLRG/providers/Microsoft.Network/firewallPolicies/FirewallPolicy_MUSW1-NP02-N001-AZFW_NortonLife/ruleCollectionGroups/DefaultDnatRuleCollectionGroup"
+      },
+      {
+        "id": "/subscriptions/7a06e974-7329-4485-87e7-3211b06c15aa/resourcegroups/NortonLLRG/providers/Microsoft.Network/firewallPolicies/FirewallPolicy_MUSW1-NP02-N001-AZFW_NortonLife/ruleCollectionGroups/DefaultNetworkRuleCollectionGroup"
+      },
+      {
+        "id": "/subscriptions/7a06e974-7329-4485-87e7-3211b06c15aa/resourcegroups/NortonLLRG/providers/Microsoft.Network/firewallPolicies/FirewallPolicy_MUSW1-NP02-N001-AZFW_NortonLife/ruleCollectionGroups/DefaultApplicationRuleCollectionGroup"
+      }
+    ],
+    "firewalls": [],
+    "provisioningState": "Succeeded"
+  },
+  "id": "/subscriptions/7a06e974-7329-4485-87e7-3211b06c15aa/resourcegroups/NortonLLRG/providers/Microsoft.Network/firewallPolicies/FirewallPolicy_MUSW1-NP02-N001-AZFW_NortonLife",
+  "name": "FirewallPolicy_MUSW1-NP02-N001-AZFW_NortonLife",
+  "type": "Microsoft.Network/FirewallPolicies",
+  "etag": "bd4edabd-ba7b-4ecf-aa83-444b90f434e6",
+  "location": "westus",
+  "tags": {}
+}

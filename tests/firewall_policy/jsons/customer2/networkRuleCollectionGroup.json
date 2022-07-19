@@ -1,0 +1,279 @@
+{
+  "properties": {
+    "priority": 102,
+    "ruleCollections": [
+      {
+        "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
+        "action": {
+          "type": "Allow"
+        },
+        "rules": [
+          {
+            "ruleType": "ApplicationRule",
+            "name": "ITSCS036-git-Allow",
+            "protocols": [
+              {
+                "protocolType": "Http",
+                "port": 80
+              },
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "git.its.iastate.edu"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.192.248.52"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          },
+          {
+            "ruleType": "ApplicationRule",
+            "name": "wd-sql-storageaccount-allow",
+            "protocols": [
+              {
+                "protocolType": "Http",
+                "port": 80
+              },
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "*.core.windows.net",
+              "*.core.microsoft.net"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.192.240.100",
+              "10.192.240.101",
+              "10.192.240.102",
+              "10.192.246.232",
+              "10.192.246.233",
+              "10.192.247.240"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          }
+        ],
+        "name": "db-servers-ac",
+        "priority": 275
+      },
+      {
+        "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
+        "action": {
+          "type": "Allow"
+        },
+        "rules": [
+          {
+            "ruleType": "ApplicationRule",
+            "name": "global_proxy",
+            "protocols": [
+              {
+                "protocolType": "Http",
+                "port": 80
+              },
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "*.microsoft.com",
+              "*.windowsupdate.com",
+              "www.msftnsci.com",
+              "*.windowsazure.com",
+              "*.microsoftonline.com",
+              "*.windows.net",
+              "*.oktacdn.com",
+              "login.iastate.edu",
+              "iastate.okta.com",
+              "iastate.oktapreview.com",
+              "*.iastate.splunkcloudgc.com",
+              "sv.symcb.com",
+              "sv.symcd.com",
+              "s1.symcb.com",
+              "s2.symcb.com",
+              "ocsp.usertrust.com",
+              "*.digicert.com",
+              "crl.incommon-rsa.org",
+              "iastate2.oktapreview.com",
+              "iastate3.oktapreview.com",
+              "ocsp.incommon-rsa.org",
+              "*.centos.org",
+              "*.msftconnecttest.com",
+              "*.its.iastate.edu",
+              "aplustest.iastate.edu",
+              "ocsp.verisign.com",
+              "crl.verisign.com",
+              "crl.sectigo.com",
+              "ocsp.sectigo.com",
+              "ocsp.pki.google.com",
+              "crt.usertrust.com",
+              "ocsp.comodoca.com",
+              "*.thawte.com",
+              "sus.iastate.edu",
+              "safebrowsing.googleapis.com",
+              "crl.comodoca.com",
+              "ocsp.pki.goog",
+              "ocsp.godaddy.com",
+              "ocsp.entrust.net",
+              "ocsp.sca1b.amazontrust.com",
+              "ocsp.starfieldtech.com",
+              "ocsp.msocsp.com",
+              "ocsp.globalsign.com",
+              "ocsp2.globalsign.com",
+              "ocsp.rootca1.amazontrust.com",
+              "iastate-admin.okta.com"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [],
+            "destinationAddresses": [],
+            "sourceIpGroups": [
+              "/subscriptions/98c8ee72-fc92-49db-997a-f7f29684f059/resourceGroups/aag-ncus-100-rg/providers/Microsoft.Network/ipGroups/proxy_hosts"
+            ]
+          }
+        ],
+        "name": "aag-proxy",
+        "priority": 101
+      },
+      {
+        "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
+        "action": {
+          "type": "Allow"
+        },
+        "rules": [
+          {
+            "ruleType": "ApplicationRule",
+            "name": "aag-0153_0001-ar",
+            "protocols": [
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "agslb2.gis.iastate.edu"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.0.0.0/8"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          }
+        ],
+        "name": "aag-0153-ac",
+        "priority": 100
+      },
+      {
+        "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
+        "action": {
+          "type": "Allow"
+        },
+        "rules": [
+          {
+            "ruleType": "ApplicationRule",
+            "name": "aag-0057_0001-ar",
+            "protocols": [
+              {
+                "protocolType": "Http",
+                "port": 80
+              },
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "navigator-dev.its.iastate.edu"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.192.250.22"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          }
+        ],
+        "name": "aag-0057-ac",
+        "priority": 102
+      },
+      {
+        "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
+        "action": {
+          "type": "Allow"
+        },
+        "rules": [
+          {
+            "ruleType": "ApplicationRule",
+            "name": "aag-0033_0001-ar",
+            "protocols": [
+              {
+                "protocolType": "Http",
+                "port": 80
+              },
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "*.workday.com"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.192.246.144"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          }
+        ],
+        "name": "aag-0033-ac",
+        "priority": 103
+      }
+    ],
+    "isCreatedWithoutRuleGroup": false,
+    "provisioningState": "Succeeded"
+  },
+  "id": "/subscriptions/a322104e-95f4-4b4a-9e9a-2cbe46bc9a5c/resourceGroups/isu-aaa-ncus-100-rg/providers/Microsoft.Network/firewallPolicies/isu-aaa-ncus-100-fw-policy/ruleCollectionGroups/aag-a-rcg",
+  "name": "aag-a-rcg",
+  "type": "Microsoft.Network/FirewallPolicies/RuleCollectionGroups",
+  "etag": "f0e8c906-e722-418e-9d5a-7338aa6d0fa4",
+  "location": "northcentralus",
+  "resourceGuid": "d7390006-a50a-4ba4-0311-4e31153ff3e5",
+  "customerSubscriptionId": "a322104e-95f4-4b4a-9e9a-2cbe46bc9a5c",
+  "resourceGroupName": "isu-aaa-ncus-100-rg",
+  "parentResourceName": "isu-aaa-ncus-100-fw-policy",
+  "lastOperationId": "09ce6c5b-3f62-4c61-817f-bfc45829152f",
+  "lastOperationType": "PUT RuleCollectionGroups",
+  "lastOperationClientRequestId": "92175d47-6a7b-412a-8af4-a5f6da9fb09a",
+  "lastOperationHttpStatusCode": "OK",
+  "lastModifiedTime": "2022-02-23T17:28:52.5024822Z",
+  "createdTime": "2021-12-28T18:57:01.2864686Z",
+  "isReference": false,
+  "isDeleted": false
+}

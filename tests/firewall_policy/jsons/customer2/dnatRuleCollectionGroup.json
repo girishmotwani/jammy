@@ -1,0 +1,92 @@
+{
+  "properties": {
+    "priority": 100,
+    "ruleCollections": [
+      {
+        "ruleCollectionType": "FirewallPolicyNatRuleCollection",
+        "action": {
+          "type": "Dnat"
+        },
+        "rules": [],
+        "name": "Islandora",
+        "priority": 500
+      },
+      {
+        "ruleCollectionType": "FirewallPolicyNatRuleCollection",
+        "action": {
+          "type": "Dnat"
+        },
+        "rules": [
+          {
+            "ruleType": "NatRule",
+            "name": "dnat-to-nginx-lb-https",
+            "translatedAddress": "10.192.59.10",
+            "translatedPort": "443",
+            "ipProtocols": [
+              "TCP"
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "sourceIpGroups": [],
+            "destinationAddresses": [
+              "52.252.214.230"
+            ],
+            "destinationPorts": [
+              "443"
+            ]
+          },
+          {
+            "ruleType": "NatRule",
+            "name": "dnat-to-nginx-lb-http",
+            "translatedAddress": "10.192.59.10",
+            "translatedPort": "80",
+            "ipProtocols": [
+              "TCP"
+            ],
+            "sourceAddresses": [
+              "*"
+            ],
+            "sourceIpGroups": [],
+            "destinationAddresses": [
+              "52.252.214.230"
+            ],
+            "destinationPorts": [
+              "80"
+            ]
+          }
+        ],
+        "name": "aks-ingress-dnat-rules",
+        "priority": 100
+      },
+      {
+        "ruleCollectionType": "FirewallPolicyNatRuleCollection",
+        "action": {
+          "type": "Dnat"
+        },
+        "rules": [],
+        "name": "JasonTest",
+        "priority": 101
+      }
+    ],
+    "isCreatedWithoutRuleGroup": false,
+    "provisioningState": "Succeeded"
+  },
+  "id": "/subscriptions/a322104e-95f4-4b4a-9e9a-2cbe46bc9a5c/resourcegroups/isu-aaa-ncus-100-rg/providers/Microsoft.Network/firewallPolicies/isu-aaa-ncus-100-fw-policy/ruleCollectionGroups/DefaultDnatRuleCollectionGroup",
+  "name": "DefaultDnatRuleCollectionGroup",
+  "type": "Microsoft.Network/FirewallPolicies/RuleCollectionGroups",
+  "etag": "10cc4912-c508-4d6e-9c6b-716fb9d74d4e",
+  "location": "northcentralus",
+  "resourceGuid": "dec7af77-7ee7-3230-16c7-3b8db1d47a86",
+  "customerSubscriptionId": "a322104e-95f4-4b4a-9e9a-2cbe46bc9a5c",
+  "resourceGroupName": "isu-aaa-ncus-100-rg",
+  "parentResourceName": "isu-aaa-ncus-100-fw-policy",
+  "lastOperationId": "315d86cf-d6fa-4c70-9056-a85e2bc3287a",
+  "lastOperationType": "PUT RuleCollectionGroups",
+  "lastOperationClientRequestId": "0156720d-8754-4169-89e6-eac48ddd604b",
+  "lastOperationHttpStatusCode": "OK",
+  "lastModifiedTime": "2022-01-31T22:55:59.6994514Z",
+  "createdTime": "2021-08-15T15:30:41.5822422Z",
+  "isReference": false,
+  "isDeleted": false
+}

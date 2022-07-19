@@ -1,0 +1,404 @@
+{
+  "properties": {
+    "priority": 300,
+    "ruleCollections": [
+      {
+        "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
+        "action": {
+          "type": "Allow"
+        },
+        "rules": [
+          {
+            "ruleType": "ApplicationRule",
+            "name": "CHG0035468",
+            "protocols": [
+              {
+                "protocolType": "Mssql",
+                "port": 1433
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "mue2nfdbprod.database.windows.net"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.142.116.0/22"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          }
+        ],
+        "name": "MS-SQL-ACCESS-FQDN",
+        "priority": 8000
+      },
+      {
+        "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
+        "action": {
+          "type": "Allow"
+        },
+        "rules": [
+          {
+            "ruleType": "ApplicationRule",
+            "name": "CWP",
+            "protocols": [
+              {
+                "protocolType": "Http",
+                "port": 80
+              },
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "*.force.com",
+              "*.microsoft.com",
+              "*.norton.com",
+              "*.spn.com",
+              "*.symantec.com",
+              "*.symantecliveupdate.com",
+              "s3.amazonaws.com",
+              "*.symauth.com",
+              "*.symcb.com",
+              "*.symcd.com",
+              "*.facebook.com",
+              "*.whatsapp.com"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "*"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          },
+          {
+            "ruleType": "ApplicationRule",
+            "name": "CHG0104859",
+            "protocols": [
+              {
+                "protocolType": "Http",
+                "port": 80
+              },
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "azure-splunkapi.np.norton.com",
+              "fe0001symant.upload.akamai.com",
+              "ks.norton.com",
+              "scp.norton.com",
+              "sftp.symantec.com",
+              "urlcat.norton.com",
+              "bfsfu0m3nj.execute-api.us-east-1.amazonaws.com"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.142.112.0/20",
+              "10.142.113.0/24"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          },
+          {
+            "ruleType": "ApplicationRule",
+            "name": "CHG0090724 ",
+            "protocols": [
+              {
+                "protocolType": "Http",
+                "port": 80
+              },
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "api.ifeelgoods.com",
+              "apps.telekomcloud.com",
+              "cebe.symantec.com",
+              "chips.np.norton.com",
+              "developer.amazon.com",
+              "ks.norton.com",
+              "login2.responsys.net",
+              "marketplace.appdirect.com",
+              "marketplace.telstra.com",
+              "open.kickbox.io",
+              "prod1-prc-acct.prod.aws.lifelock.com",
+              "spoc.norton.com",
+              "upware.comcast.com",
+              "urlcat.norton.com",
+              "ws2-symantecc.responsys.net",
+              "ws2.responsys.net",
+              "www.amazon.com"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.142.112.0/21",
+              "10.142.113.128/25",
+              "10.142.116.0/22"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          },
+          {
+            "ruleType": "ApplicationRule",
+            "name": "CHG0086545",
+            "protocols": [
+              {
+                "protocolType": "Http",
+                "port": 80
+              },
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "1gicgghr8i.execute-api.us-east-1.amazonaws.com",
+              "5meayqgmee.execute-api.us-east-1.amazonaws.com",
+              "a1415.g.akamai.net",
+              "accounts.google.com",
+              "antitheft-load2.norton.com",
+              "antitheft.norton.com",
+              "api-staging.surfeasy.com",
+              "api.surfeasy.com",
+              "bfsfu0m3nj.execute-api.us-east-1.amazonaws.com",
+              "bridge.surfeasy.com",
+              "buy.itunes.apple.com",
+              "collector.newrelic.com",
+              "consumerstats.brightmail.com",
+              "definitions.symantec.com",
+              "eas.akadata.akadns.net",
+              "identity.norton.com",
+              "imc2-staging2.csid.com",
+              "infra-api.newrelic.com",
+              "interceptor-plus.backup.norton.com",
+              "login.norton.com",
+              "login.salesforce.com",
+              "mb-aws-useast-prod.norton.com",
+              "my-extint.norton.com",
+              "nobu.backup.com",
+              "onlinefamily.norton.com",
+              "pitcher01.rulespace.com",
+              "pitcher02.rulespace.com",
+              "prod-eventlistener.csid.com",
+              "192.168.166.92",
+              "register.brightmail.com",
+              "s5fzhotuo9.execute-api.us-east-1.amazonaws.com",
+              "sandbox.itunes.apple.com",
+              "searchg.symantec.com",
+              "services-prod.symantec.com",
+              "sso-stg.identitymanagementcenter.com",
+              "stage.nortoncdn.com",
+              "static.nortoncdn.com",
+              "l",
+              "synthetics-horde.nr-data.net",
+              "webservice-extf02.ges.symantec.com",
+              "www.googleapis.com",
+              "www.java.sun.com",
+              "www.springframework.org",
+              "www.w3.org",
+              "CCNECDS01.usccqa.qalabs.symantec.com",
+              "milws3.incomm.com",
+              "milws4-test.incomm.com",
+              "nbaspss.symantec.com",
+              "norton.ehosts.net",
+              "qa2-web.nobu.symnds.com",
+              "websvc-prd.norton.com",
+              "websvc-uat2.norton.com",
+              "interceptor-plus-int.backup.norton.com",
+              "secure.logmeinrescue.com",
+              "nortontest.ehosts.net"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.142.113.0/26",
+              "10.142.113.128/25",
+              "10.142.113.64/26",
+              "10.142.116.0/22",
+              "10.142.122.68",
+              "10.142.123.0/26",
+              "10.46.60.160/27",
+              "10.46.61.64/27",
+              "10.142.114.0/23"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          },
+          {
+            "ruleType": "ApplicationRule",
+            "name": "CHG0162374",
+            "protocols": [
+              {
+                "protocolType": "Http",
+                "port": 80
+              },
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "int1-da-pkg.dev.aws.lifelock.com",
+              "prod1-da-pkg.prod.aws.lifelock.com"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.142.122.160/28"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          },
+          {
+            "ruleType": "ApplicationRule",
+            "name": "CHG0151894 ",
+            "protocols": [
+              {
+                "protocolType": "Http",
+                "port": 80
+              },
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "keymaster.symcpe.net"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.142.112.0/21",
+              "10.142.120.0/21"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          },
+          {
+            "ruleType": "ApplicationRule",
+            "name": "CHG0037437-CHG0034273",
+            "protocols": [
+              {
+                "protocolType": "Http",
+                "port": 80
+              },
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "mcr.microsoft.com",
+              "*.cdn.mscr.io",
+              "*.data.mcr.microsoft.com",
+              "management.azure.com",
+              "login.microsoftonline.com",
+              "acs-mirror.azureedge.net",
+              "*.hcp.westus.azmk8s.io",
+              "*.tun.westus.azmk8s.io",
+              "prod1-app-id.prod.aws.lifelock.com",
+              "prod1-prc-acct.prod.aws.lifelock.com",
+              "prod1-da-as.prod.aws.lifelock.com",
+              "prod1-prc-alerts.prod.aws.lifelock.com",
+              "prod1-fe-memex-api-ext.prod.aws.lifelock.com",
+              "prod1-app-bill.prod.aws.lifelock.com",
+              "prod1-da-pkg.prod.aws.lifelock.com",
+              "prod1-app-crm.prod.aws.lifelock.com",
+              "prod1-app-oauth.prod.aws.lifelock.com"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.142.125.128/26"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          },
+          {
+            "ruleType": "ApplicationRule",
+            "name": "test",
+            "protocols": [
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "olpadmin.norton.com"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "10.142.116.0/22"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          },
+          {
+            "ruleType": "ApplicationRule",
+            "name": "allow-social",
+            "protocols": [
+              {
+                "protocolType": "Http",
+                "port": 80
+              },
+              {
+                "protocolType": "Https",
+                "port": 443
+              }
+            ],
+            "fqdnTags": [],
+            "webCategories": [],
+            "targetFqdns": [
+              "www.youtube.com",
+              "www.google.com",
+              "www.cnn.com",
+              "www.showmyip.com"
+            ],
+            "targetUrls": [],
+            "terminateTLS": false,
+            "sourceAddresses": [
+              "*"
+            ],
+            "destinationAddresses": [],
+            "sourceIpGroups": []
+          }
+        ],
+        "name": "WEB-ACCESS-FQDNs",
+        "priority": 7000
+      }
+    ],
+    "provisioningState": "Succeeded"
+  },
+  "id": "/subscriptions/7a06e974-7329-4485-87e7-3211b06c15aa/resourcegroups/NortonLLRG/providers/Microsoft.Network/firewallPolicies/FirewallPolicy_MUSW1-NP02-N001-AZFW_NortonLife/ruleCollectionGroups/DefaultApplicationRuleCollectionGroup",
+  "name": "DefaultApplicationRuleCollectionGroup",
+  "type": "Microsoft.Network/FirewallPolicies/RuleCollectionGroups",
+  "etag": "cd3198d4-f31b-4a20-8b67-1ef2d73bb2e7",
+  "location": "westus"
+}
