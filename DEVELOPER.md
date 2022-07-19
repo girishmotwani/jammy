@@ -1,6 +1,6 @@
 # Developer Documentation
 
-Jammy uses armclient to perform cRUID operations on Azure resources. It uses python representation of the resources to
+Jammy uses armclient to perform CRUD operations on Azure resources. It uses python representation of the resources to
 manipulate the resources. The python representations are generated using the swagger specification. Autorest tool can 
 be used to auto-generate the resource models.
 

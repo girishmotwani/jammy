@@ -298,7 +298,7 @@ class TestFirewallPolicy:
      
     def put_ipg(self, resource_id, ipg):
         resourceJson = json.dumps(ipg.serialize())
-        resp = self.cl.put_resource(resource_id, resourceJson, version.VERSION)
+        resp = self.cl.put_resource(resource_id, resourceJson, "2020-06-01")
         return resp
 
     def get_ip_addr_list(self, num):
@@ -373,7 +373,7 @@ class TestFirewallPolicy:
             logger.info("test_create_delete_vnet_fw_with_ipg: Step 3.%s: Sending Arm request to add RCG", i)
             rcg_id = resourceId + '/ruleCollectionGroups/rcg' + str(i)
             resourceJson = json.dumps(rcg.serialize())
-            resp = self.cl.put_resource(rcg_id, resourceJson, version.VERSION)
+            resp = self.cl.put_resource(rcg_id, resourceJson, "2020-06-01")
             logger.info("test_create_delete_vnet_fw_with_ipg: Step 3.%s: Completed Arm request to add RCG:%s", i, rcg_id)
         logger.info("test_create_delete_vnet_fw_with_ipg: Step 3: Completed updating FW policy with RCGs")
 
