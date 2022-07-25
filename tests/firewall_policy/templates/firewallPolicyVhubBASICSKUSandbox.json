@@ -1,0 +1,568 @@
+{
+    "properties": {
+        "mode": "Incremental",
+        "template": {
+            "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+            "contentVersion": "1.0.0.0",
+            "parameters": {
+			    "virtualNetworkName": {
+					"type": "string",
+					"defaultValue": "test-vnet",
+					"metadata": {
+						"description": "virtual network name"
+					}
+				},
+                "adminUsername": {
+                    "type": "String",
+                    "defaultValue": "jammytestuser",
+                    "metadata": {
+                        "description": "Admin username for the servers"
+                    }
+                },
+                "location": {
+                    "defaultValue": "[resourceGroup().location]",
+                    "type": "String",
+                    "metadata": {
+                        "description": "Location for all resources."
+                    }
+                },
+                "vmSize": {
+                    "type": "string",
+                    "defaultValue": "Standard_D2_v3",
+                    "metadata": {
+                        "description": "Size of the virtual machine."
+                    }
+                },
+                "numberOfFirewallPublicIPAddresses": {
+                    "type": "int",
+                    "defaultValue": 1,
+                    "minValue": 1,
+                    "maxValue": 100,
+                    "metadata": {
+                        "description": "Number of public IP addresses for the Azure Firewall"
+                    }
+                },
+                "authenticationType": {
+                    "type": "string",
+                    "defaultValue": "sshPublicKey",
+                    "allowedValues": [
+                        "sshPublicKey",
+                        "password"
+                    ],
+                    "metadata": {
+                        "description": "Type of authentication to use on the Virtual Machine. SSH key is recommended."
+                    }
+                },
+                "adminPasswordOrKey": {
+                    "type": "securestring",
+                    "defaultValue": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDj5gv1ybwEr9wN2e+TTxxbuKRcNPHEC+Col8CeOkqrAigJjDRjuhw+Iq1BK0w4RFQTzdb+IF9OYgMbL4Apmpp1Rj94mn9M4BrV105xUpdW28ixZJ5duM1F1v7pBBLwpUylFBMhrbfjbJRLCKjQM90jg9Xp6ucpd079NKFXvrPMSpFH7dW8oHBZVQh/cwu/4GyXVHtaAZvefsFAagtcmhKbfY6ymVD+vbWli80WkIH6CoQTyPRJ1giRtGFCNbrwCcDKi8tkOQtHKFJAMra60AQIp/dYB2XBcwMsdcST0fDjn1HOqBEweWVtEBiRemBktoUW8nGys+k70trniW1SOX1qd76YgMTcrB4mwLGse6PT5rB7BudReief74WG18urqVfdOq+HgAQjW+/wsGUIG00aXy8Eqnls9MPZB02vEfOO0/CgTDjZ6g4HA+KvGE82BktAiwAcVrXpoF60Og4A3/OfUG/eqdHelixH/Q8EX5wC+0/hpFmsaxFKP7dN+UY8Jus= gimotwan@DESKTOP-SUVC9U8",
+                    "metadata": {
+                        "description": "SSH Key or password for the Virtual Machine. SSH key is recommended."
+                    }
+                }
+            },
+            "variables": {
+                "vnetAddressPrefix": "10.0.0.0/16",
+                "serversSubnetPrefix": "10.0.2.0/24",
+                "azureFirewallSubnetPrefix": "10.0.1.0/24",
+                "jumpboxSubnetPrefix": "10.0.0.0/24",
+                "nextHopIP": "10.0.1.4",
+                "azureFirewallSubnetName": "AzureFirewallSubnet",
+                "jumpBoxSubnetName": "JumpboxSubnet",
+                "serversSubnetName": "ServersSubnet",
+                "jumpBoxPublicIPAddressName": "JumpHostPublicIP",
+                "jumpBoxNsgName": "JumpHostNSG",
+                "jumpBoxNicName": "JumpHostNic",
+                "jumpBoxSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), variables('jumpBoxSubnetName'))]",
+                "serverNicName": "ServerNic",
+                "serverSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), variables('serversSubnetName'))]",
+                "storageAccountName": "[concat(uniquestring(resourceGroup().id), 'sajumpbox')]",
+                "azfwRouteTableName": "AzfwRouteTable",
+                "firewallName": "firewall1",
+                "publicIPNamePrefix": "publicIP",
+                "azureFirewallSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets',parameters('virtualNetworkName'), variables('azureFirewallSubnetName'))]",
+                "azureFirewallSubnetJSON": "[json(format('{{\"id\": \"{0}\"}}', variables('azureFirewallSubnetId')))]",
+                "copy": [
+                    {
+                        "name": "azureFirewallIpConfigurations",
+                        "count": "[parameters('numberOfFirewallPublicIPAddresses')]",
+                        "input": {
+                            "name": "[concat('IpConf', copyIndex('azureFirewallIpConfigurations'))]",
+                            "properties": {
+                                "subnet": "[if(equals(copyIndex('azureFirewallIpConfigurations'), 0), variables('azureFirewallSubnetJSON'), json('null'))]",
+                                "publicIPAddress": {
+                                    "id": "[resourceId('Microsoft.Network/publicIPAddresses', concat(variables('publicIPNamePrefix'), add(copyIndex('azureFirewallIpConfigurations'), 1)))]"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "linuxConfiguration": {
+                    "disablePasswordAuthentication": true,
+                    "ssh": {
+                        "publicKeys": [
+                            {
+                                "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
+                                "keyData": "[parameters('adminPasswordOrKey')]"
+                            }
+                        ]
+                    }
+                },
+                "networkSecurityGroupName": "[concat(variables('serversSubnetName'), '-nsg')]"
+            },
+            "resources": [
+                {
+					"type": "Microsoft.Storage/storageAccounts",
+					"name": "[variables('storageAccountName')]",
+					"apiVersion": "2019-06-01",
+					"location": "[parameters('location')]",
+					"sku": {
+						"name": "Standard_LRS"
+					},
+					"kind": "Storage",
+					"properties": {}
+				},
+				{
+                    "type": "Microsoft.Network/virtualWans",
+                    "apiVersion": "2020-06-01",
+                    "name": "VWan-01",
+                    "location": "[parameters('location')]",
+                    "properties": {
+                        "disableVpnEncryption": false,
+                        "allowBranchToBranchTraffic": true,
+                        "office365LocalBreakoutCategory": "None",
+                        "type": "Standard"
+                    }
+                },
+								{
+					"comments": "Simple Network Security Group for subnet [variables('serversSubnetName')]",
+					"type": "Microsoft.Network/networkSecurityGroups",
+					"apiVersion": "2020-05-01",
+					"name": "[variables('networkSecurityGroupName')]",
+					"location": "[parameters('location')]",
+					"properties": {}
+				},
+                {
+                    "type": "Microsoft.Network/virtualHubs",
+                    "apiVersion": "2020-06-01",
+                    "name": "Hub-01",
+                    "location": "[parameters('location')]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Network/virtualWans', 'VWan-01')]"
+                    ],
+                    "properties": {
+                        "addressPrefix": "10.1.0.0/16",
+                        "virtualWan": {
+                            "id": "[resourceId('Microsoft.Network/virtualWans', 'VWan-01')]"
+                        }
+                    }
+                },
+                {
+                    "type": "Microsoft.Network/virtualHubs/hubVirtualNetworkConnections",
+                    "apiVersion": "2020-06-01",
+                    "name": "Hub-01/hub-spoke",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Network/azureFirewalls', variables('firewallName'))]",
+                        "[resourceId('Microsoft.Network/virtualHubs', 'Hub-01')]",
+                        "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
+                        "[resourceId('Microsoft.Network/virtualHubs/hubRouteTables', 'Hub-01', 'RT_VNet')]"
+                    ],
+                    "properties": {
+                        "remoteVirtualNetwork": {
+                            "id": "[resourceId('Microsoft.Network/virtualNetworks', 'Spoke-01')]"
+                        },
+                        "allowHubToRemoteVnetTransit": true,
+                        "allowRemoteVnetToUseHubVnetGateways": false,
+                        "enableInternetSecurity": true,
+                        "routingConfiguration": {
+                            "associatedRouteTable": {
+                                "id": "[resourceId('Microsoft.Network/virtualHubs/hubRouteTables', 'Hub-01', 'RT_VNet')]"
+                            },
+                            "propagatedRouteTables": {
+                                "labels": [
+                                    "VNet"
+                                ],
+                                "ids": [
+                                    {
+                                        "id": "[resourceId('Microsoft.Network/virtualHubs/hubRouteTables', 'Hub-01', 'RT_VNet')]"
+                                    }
+                                ]
+                            }
+                        }
+                    }
+                },
+				{
+					"type": "Microsoft.Network/routeTables",
+					"name": "[variables('azfwRouteTableName')]",
+					"apiVersion": "2020-05-01",
+					"location": "[parameters('location')]",
+					"properties": {
+						"disableBgpRoutePropagation": false,
+						"routes": [
+							{
+								"name": "AzfwDefaultRoute",
+								"properties": {
+									"addressPrefix": "0.0.0.0/0",
+									"nextHopType": "VirtualAppliance",
+									"nextHopIpAddress": "[variables('nextHopIP')]"
+								}
+							}
+						]
+					}
+				},
+                {
+                    "type": "Microsoft.Network/firewallPolicies",
+                    "apiVersion": "2020-06-01",
+                    "name": "Policy-01",
+                    "location": "[parameters('location')]",
+                    "properties": {
+                        "threatIntelMode": "Alert"
+                    }
+                },
+                {
+                    "type": "Microsoft.Network/firewallPolicies/ruleCollectionGroups",
+                    "apiVersion": "2020-06-01",
+                    "name": "Policy-01/DefaultApplicationRuleCollectionGroup",
+                    "location": "[parameters('location')]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Network/firewallPolicies', 'Policy-01')]"
+                    ],
+                    "properties": {
+                        "priority": 300,
+                        "ruleCollections": [
+                            {
+                                "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
+                                "name": "RC-01",
+                                "priority": 100,
+                                "action": {
+                                    "type": "Allow"
+                                },
+                                "rules": [
+                                    {
+                                        "ruleType": "ApplicationRule",
+                                        "name": "Allow-msft",
+                                        "sourceAddresses": [
+                                            "*"
+                                        ],
+                                        "protocols": [
+                                            {
+                                                "port": "80",
+                                                "protocolType": "http"
+                                            },
+                                            {
+                                                "port": "443",
+                                                "protocolType": "https"
+                                            }
+                                        ],
+                                        "targetFqdns": [
+                                            "*.microsoft.com"
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                },
+                {
+                    "type": "Microsoft.Network/azureFirewalls",
+                    "apiVersion": "2020-06-01",
+                    "name": "[variables('firewallName')]",
+                    "location": "[parameters('location')]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Network/virtualHubs', 'Hub-01')]",
+                        "[resourceId('Microsoft.Network/firewallPolicies', 'Policy-01')]"
+                    ],
+                    "properties": {
+                        "sku": {
+                            "name": "AZFW_Hub",
+                            "tier": "Basic"
+                        },
+                        "hubIPAddresses": {
+                            "publicIPs": {
+                                "count": 1
+                            }
+                        },
+                        "virtualHub": {
+                            "id": "[resourceId('Microsoft.Network/virtualHubs', 'Hub-01')]"
+                        },
+                        "firewallPolicy": {
+                            "id": "[resourceId('Microsoft.Network/firewallPolicies', 'Policy-01')]"
+                        }
+                    }
+                },
+				{
+					"name": "[parameters('virtualNetworkName')]",
+					"apiVersion": "2020-05-01",
+					"type": "Microsoft.Network/virtualNetworks",
+					"location": "[parameters('location')]",
+					"dependsOn": [
+						"[resourceId('Microsoft.Network/routeTables', variables('azfwRouteTableName'))]",
+						"[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+					],
+					"tags": {
+						"displayName": "[parameters('virtualNetworkName')]"
+					},
+					"properties": {
+						"addressSpace": {
+							"addressPrefixes": [
+								"[variables('vnetAddressPrefix')]"
+							]
+						},
+						"subnets": [
+							{
+								"name": "[variables('jumpBoxSubnetName')]",
+								"properties": {
+									"addressPrefix": "[variables('jumpboxSubnetPrefix')]"
+								}
+							},
+							{
+								"name": "[variables('azureFirewallSubnetName')]",
+								"properties": {
+									"addressPrefix": "[variables('azureFirewallSubnetPrefix')]"
+								}
+							},
+							{
+								"name": "[variables('serversSubnetName')]",
+								"properties": {
+									"addressPrefix": "[variables('serversSubnetPrefix')]",
+									"routeTable": {
+										"id": "[resourceId('Microsoft.Network/routeTables', variables('azfwRouteTableName'))]"
+									},
+									"networkSecurityGroup": {
+										"id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+									}
+								}
+							}
+						]
+					}
+				},
+                {
+                    "type": "Microsoft.Compute/virtualMachines",
+                    "apiVersion": "2020-06-01",
+                    "name": "Jump-Srv",
+                    "location": "[parameters('location')]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+                        "[resourceId('Microsoft.Network/networkInterfaces', variables('JumpBoxNicName'))]"
+                    ],
+                    "properties": {
+                        "hardwareProfile": {
+                            "vmSize": "[parameters('vmSize')]"
+                        },
+                        "storageProfile": {
+                            "imageReference": {
+                                "publisher": "Canonical",
+                                "offer": "UbuntuServer",
+                                "sku": "18.04-LTS",
+                                "version": "latest"
+                            },
+                            "osDisk": {
+                                "createOption": "FromImage"
+                            }
+                        },
+                        "osProfile": {
+                            "computerName": "JumpBox",
+                            "adminUsername": "[parameters('adminUsername')]",
+                            "adminPassword": "[parameters('adminPasswordOrKey')]",
+                            "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]"
+                        },
+                        "networkProfile": {
+                            "networkInterfaces": [
+                                {
+                                    "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('JumpBoxNicName'))]"
+                                }
+                            ]
+                        },
+                        "diagnosticsProfile": {
+                            "bootDiagnostics": {
+                                "enabled": true,
+                                "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))).primaryEndpoints.blob]"
+                            }
+                        }
+                    }
+                },
+                {
+                    "name": "Server",
+                    "type": "Microsoft.Compute/virtualMachines",
+                    "apiVersion": "2019-12-01",
+                    "location": "[parameters('location')]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+                        "[resourceId('Microsoft.Network/networkInterfaces', variables('ServerNicName'))]"
+                    ],
+                    "properties": {
+                        "hardwareProfile": {
+                            "vmSize": "[parameters('vmSize')]"
+                        },
+                        "storageProfile": {
+                            "imageReference": {
+                                "publisher": "Canonical",
+                                "offer": "UbuntuServer",
+                                "sku": "18.04-LTS",
+                                "version": "latest"
+                            },
+                            "osDisk": {
+                                "createOption": "FromImage"
+                            }
+                        },
+                        "osProfile": {
+                            "computerName": "Server",
+                            "adminUsername": "[parameters('adminUsername')]",
+                            "adminPassword": "[parameters('adminPasswordOrKey')]",
+                            "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]"
+                        },
+                        "networkProfile": {
+                            "networkInterfaces": [
+                                {
+                                    "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('ServerNicName'))]"
+                                }
+                            ]
+                        },
+                        "diagnosticsProfile": {
+                            "bootDiagnostics": {
+                                "enabled": true,
+                                "storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))).primaryEndpoints.blob]"
+                            }
+                        }
+                    }
+                },
+                {
+                    "apiVersion": "2020-05-01",
+                    "type": "Microsoft.Network/networkInterfaces",
+                    "name": "[variables('ServerNicName')]",
+                    "location": "[parameters('location')]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]"
+                    ],
+                    "properties": {
+                        "ipConfigurations": [
+                            {
+                                "name": "ipconfig1",
+                                "properties": {
+                                    "privateIPAllocationMethod": "Dynamic",
+                                    "subnet": {
+                                        "id": "[variables('serverSubnetId')]"
+                                    }
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "name": "[variables('jumpBoxPublicIPAddressName')]",
+                    "type": "Microsoft.Network/publicIPAddresses",
+                    "apiVersion": "2020-05-01",
+                    "location": "[parameters('location')]",
+                    "properties": {
+                        "publicIPAllocationMethod": "Dynamic"
+                    }
+                },
+                {
+                    "name": "[variables('jumpBoxNsgName')]",
+                    "type": "Microsoft.Network/networkSecurityGroups",
+                    "apiVersion": "2020-05-01",
+                    "location": "[parameters('location')]",
+                    "properties": {
+                        "securityRules": [
+                            {
+                                "name": "myNetworkSecurityGroupRuleSSH",
+                                "properties": {
+                                    "protocol": "Tcp",
+                                    "sourcePortRange": "*",
+                                    "destinationPortRange": "22",
+                                    "sourceAddressPrefix": "*",
+                                    "destinationAddressPrefix": "*",
+                                    "access": "Allow",
+                                    "priority": 1000,
+                                    "direction": "Inbound"
+                                }
+                            }
+                        ]
+                    }
+                },
+                {
+                    "apiVersion": "2020-05-01",
+                    "type": "Microsoft.Network/networkInterfaces",
+                    "name": "[variables('JumpBoxNicName')]",
+                    "location": "[parameters('location')]",
+                    "dependsOn": [
+                        "[resourceId('Microsoft.Network/publicIPAddresses', variables('jumpBoxPublicIPAddressName'))]",
+                        "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
+                        "[resourceId('Microsoft.Network/networkSecurityGroups', variables('jumpBoxNsgName'))]"
+                    ],
+                    "properties": {
+                        "ipConfigurations": [
+                            {
+                                "name": "ipconfig1",
+                                "properties": {
+                                    "privateIPAllocationMethod": "Dynamic",
+                                    "publicIPAddress": {
+                                        "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('jumpBoxPublicIPAddressName'))]"
+                                    },
+                                    "subnet": {
+                                        "id": "[variables('jumpBoxSubnetId')]"
+                                    }
+                                }
+                            }
+                        ],
+                        "networkSecurityGroup": {
+                            "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('jumpBoxNsgName'))]"
+                        }
+                    }
+                },
+				{
+      "type": "Microsoft.Network/routeTables",
+      "apiVersion": "2020-06-01",
+      "name": "RT-01",
+      "location": "[parameters('location')]",
+      "properties": {
+        "disableBgpRoutePropagation": false,
+        "routes": [
+          {
+            "name": "jump-to-inet",
+            "properties": {
+              "addressPrefix": "0.0.0.0/0",
+              "nextHopType": "Internet"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Network/virtualHubs/hubRouteTables",
+      "apiVersion": "2020-06-01",
+      "name": "Hub-01/RT_VNet",
+      "location": "[parameters('location')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/azureFirewalls', variables('firewallName'))]"
+      ],
+      "properties": {
+        "routes": [
+          {
+            "name": "Workload-SNToFirewall",
+            "destinationType": "CIDR",
+            "destinations": [
+              "10.0.1.0/24"
+            ],
+            "nextHopType": "ResourceId",
+            "nextHop": "[resourceId('Microsoft.Network/azureFirewalls', variables('firewallName'))]"
+          },
+          {
+            "name": "InternetToFirewall",
+            "destinationType": "CIDR",
+            "destinations": [
+              "0.0.0.0/0"
+            ],
+            "nextHopType": "ResourceId",
+            "nextHop": "[resourceId('Microsoft.Network/azureFirewalls', variables('firewallName'))]"
+          }
+        ],
+        "labels": [
+          "VNet"
+        ]
+      }
+    }
+            ]
+        }
+    }
+}
