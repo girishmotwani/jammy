@@ -5,7 +5,7 @@ SSH shell implementation.
 import logging
 import select
 import socket
-import StringIO
+from io import StringIO
 import subprocess
 import threading
 import time

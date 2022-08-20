@@ -8,6 +8,8 @@ import os
 import pytest
 import random
 from jammy.armclient import ArmClient
+from jammy.jumpbox import JumpBox
+from jammy.ubuntu import Ubuntu
 from jammy.models.firewallPolicy import *
 from jammy.models.ipgroups import *
 from jammy.models.publicIPaddress import *
@@ -16,6 +18,8 @@ from jammy.models.azurefirewall import AzureFirewall
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+
+CLIENT_PRIVATE_IP="10.0.2.4"
 
 class TestAzureFirewallDatapath:
 
@@ -114,3 +118,12 @@ class TestAzureFirewallDatapath:
 
         logger.info("Jumpbox PIP is [%s]", publicIP.ip_address)
 
+        # 2. Now connect to the client machine via Jumpbox
+        jumpbox = JumpBox()
+        jumpbox.public_ip = publicIP.ip_address
+
+        client_machine = Ubuntu()
+        client_machine.ssh_hop = jumpbox
+        client_machine.private_ip = CLIENT_PRIVATE_IP
+        client_machine.private_key_path = os.path.join(os.path.dirname(__file__), 'keys', 'jammytest.pem')
+        client_machine.exec_command('curl http://www.google.com')
