@@ -1,7 +1,6 @@
 """
 A shell implementation when using a gateway.
 
-Copyright 2016 Bracket Computing, Inc.
 """
 import logging
 
