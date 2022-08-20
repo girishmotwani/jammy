@@ -1,4 +1,4 @@
-"""Common utility functions for usage in Yolo."""
+"""Common utility functions for usage in Jammy."""
 
 import datetime
 import logging
