@@ -10,7 +10,7 @@ from jammy.ubuntu import Ubuntu
 logger = logging.getLogger(__name__)
 
 
-class Jumpbox(Ubuntu):
+class JumpBox(Ubuntu):
     """
     The Jumpbox class represents a jumpbox instance
     """
@@ -22,5 +22,5 @@ class Jumpbox(Ubuntu):
         :param role: Role of instance
         """
 
-        super(NatGw, self).__init__()
+        super(JumpBox, self).__init__()
         self.username = 'gsauser'

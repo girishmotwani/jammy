@@ -72,7 +72,7 @@ class Ubuntu(Linux):
         if exit_status == 0:
             return True
         else:
-            print response
+            print(response)
             return False
 
     def create_group(self,
@@ -89,5 +89,5 @@ class Ubuntu(Linux):
         if exit_status == 0:
             return True
         else:
-            print response
+            print(response)
             return False

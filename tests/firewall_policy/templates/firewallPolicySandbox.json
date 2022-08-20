@@ -17,7 +17,7 @@
 				},
 				"adminUsername": {
 					"type": "string",
-					"defaultValue": "jammytestuser",
+					"defaultValue": "gsauser",
 					"metadata": {
 						"description": "Username for the Virtual Machine."
 					}
@@ -58,7 +58,7 @@
 				},
 				"adminPasswordOrKey": {
 					"type": "securestring",
-					"defaultValue": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDj5gv1ybwEr9wN2e+TTxxbuKRcNPHEC+Col8CeOkqrAigJjDRjuhw+Iq1BK0w4RFQTzdb+IF9OYgMbL4Apmpp1Rj94mn9M4BrV105xUpdW28ixZJ5duM1F1v7pBBLwpUylFBMhrbfjbJRLCKjQM90jg9Xp6ucpd079NKFXvrPMSpFH7dW8oHBZVQh/cwu/4GyXVHtaAZvefsFAagtcmhKbfY6ymVD+vbWli80WkIH6CoQTyPRJ1giRtGFCNbrwCcDKi8tkOQtHKFJAMra60AQIp/dYB2XBcwMsdcST0fDjn1HOqBEweWVtEBiRemBktoUW8nGys+k70trniW1SOX1qd76YgMTcrB4mwLGse6PT5rB7BudReief74WG18urqVfdOq+HgAQjW+/wsGUIG00aXy8Eqnls9MPZB02vEfOO0/CgTDjZ6g4HA+KvGE82BktAiwAcVrXpoF60Og4A3/OfUG/eqdHelixH/Q8EX5wC+0/hpFmsaxFKP7dN+UY8Jus= gimotwan@DESKTOP-SUVC9U8",
+					"defaultValue": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCpaQl5ASt0FlPjPoMDabG1QJHM5EIoMOGq+FlpHcTEsGrP5Cu1MdLr6/l84qs4Q7TsZ1JO1pAqEAn5lo2ZRhSlt+Afa/J6OatqlTWl50wYh5DPptSCLdXkIcMIr2GqvrlZQWPppLDMzIRxf1ILjKAV1UYNCyS+Qk5sA2dMry/ZZ3pSGLpukH7+N9X0hLR665iCvoZ/vku5hUbYMVKtmqODowaHjRzksAooqM9d3iz3MSqGRcW21qjC23Ooc/tfFnHl+wngsCkWRO5KXwuM4GtS1tAzLkL1xB7bJprYij9u5JYZKt7fzvKWD/7KbTFGnXEOpqAsElaDTYNOqRqh1mp87QEVPdhgAvsgJDJk76XBg7A8dJqfb3YxPsK/7LWB7YHreprf+wr7q/tat0Vj46df0+X4ocxX2xjEh8JjDVlPQXpFKmqtAop1Ls5fV3bwCZJ2pvhF5zeC7hMvlK54cmJkIz4YwOTG8zi52o1E97yI6Wc0dGmnRF+O7LRARJKJIq0= generated-by-azure",
 					"metadata": {
 						"description": "SSH Key or password for the Virtual Machine. SSH key is recommended."
 					}
@@ -402,6 +402,7 @@
 						"[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
 						"publicIpCopy"
 					],
+					"zones": [1, 2, 3],
 					"properties": {
 						"ipConfigurations": "[variables('azureFirewallIpConfigurations')]"
 					}
