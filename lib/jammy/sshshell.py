@@ -5,7 +5,7 @@ SSH shell implementation.
 import logging
 import select
 import socket
-import StringIO
+from io import StringIO
 import subprocess
 import threading
 import time
@@ -338,7 +338,7 @@ class SshShell(object):
         The reason for more or less copy pasting exec_command is that the
         return type of this function is different, and it also does not
         get_pty. Because of these small differences and the fact that
-        exec_command is used everywhere in Yolo, we want this in its own
+        exec_command is used everywhere in jammy, we want this in its own
         function.
 
         This is for a single command only, no
