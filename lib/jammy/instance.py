@@ -7,7 +7,6 @@ import logging
 import time
 
 from jammy.bastionshell import BastionShell
-from jammy.sshshell import SshShell
 
 RETRY_TIMEOUT_S = 15
 logger = logging.getLogger(__name__)
@@ -110,13 +109,6 @@ class Instance(object):
             self._shell = self.get_shell()
         return self._shell
 
-    @property
-    def sftp_client(self):
-        if self._sftp_client is None:
-            self._sftp_client = self.shell.get_sftp_client()
-
-        return self._sftp_client
-
     def get_shell(self):
         """ Shell for executing commands, use if you need more than one
             connection running at the same time...
@@ -129,13 +121,8 @@ class Instance(object):
             return None
 
         if self.ssh_hop is None:
-            # Use private IP if there's no public
-            host = self.public_ip if self.public_ip else self.private_ip
-            shell = SshShell(host,
-                             self.username,
-                             self.password,
-                             self.private_key_path,
-                             self.dst_port)
+            logger.error('Instance should have a ssh hop')
+            return None
         else:
             shell = BastionShell(self.private_ip,
                                  self.username,
