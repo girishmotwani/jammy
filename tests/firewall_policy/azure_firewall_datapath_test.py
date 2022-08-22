@@ -8,6 +8,7 @@ import os
 import pytest
 import random
 from jammy.armclient import ArmClient
+from jammy.exceptions import CommandError, CommandTimeout, JammyError
 from jammy.jumpbox import JumpBox
 from jammy.ubuntu import Ubuntu
 from jammy.models.firewallPolicy import *
