@@ -3,6 +3,7 @@ A shell implementation when using a gateway.
 
 """
 import logging
+from  jammy.exceptions import *
 from jumpssh import SSHSession, TimeoutError, RunCmdError
 
 logger = logging.getLogger(__name__)
