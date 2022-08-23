@@ -358,7 +358,7 @@ class TestFirewallPolicy:
         # create rule collection groups
         for i in range(0, int(num_rcg)):
             rcg = FirewallPolicyRuleCollectionGroup()
-            rcg.priority = 200 + i
+            rcg.priority = 201 + i
             rcg.rule_collections = []
             for j in range(0, int(num_rc)):
                 rc = FirewallPolicyFilterRuleCollection()
