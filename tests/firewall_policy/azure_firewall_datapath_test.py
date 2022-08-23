@@ -8,6 +8,7 @@ import os
 import pytest
 import random
 from jammy.armclient import ArmClient
+from jammy.exceptions import CommandError, CommandTimeout, JammyError
 from jammy.jumpbox import JumpBox
 from jammy.ubuntu import Ubuntu
 from jammy.models.firewallPolicy import *
@@ -123,7 +124,11 @@ class TestAzureFirewallDatapath:
         jumpbox.public_ip = publicIP.ip_address
 
         client_machine = Ubuntu()
+        client_machine.username = "gsauser"
         client_machine.ssh_hop = jumpbox
         client_machine.private_ip = CLIENT_PRIVATE_IP
         client_machine.private_key_path = os.path.join(os.path.dirname(__file__), 'keys', 'jammytest.pem')
-        client_machine.exec_command('curl http://www.google.com')
+        try:
+            result = client_machine.exec_command('curl http://www.google.com')
+        except CommandError:
+            logger.info('Access to http://www.google.com denied as expected as there is no firewall rule to allow traffic')

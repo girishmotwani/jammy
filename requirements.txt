@@ -13,3 +13,4 @@ azure-core==1.22.1
 msrest==0.6.19
 pytest-html==3.1.1
 cryptography==2.8
+jumpssh==1.6.5
