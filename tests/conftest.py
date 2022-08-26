@@ -14,6 +14,8 @@ logging.basicConfig(level=logging.INFO,
 logger = logging.getLogger(__name__)
 
 def pytest_addoption(parser):
+    parser.addoption("--subscriptionIds", required=True,
+	help='Subscription Ids', nargs=3)
     parser.addoption("--subscriptionId", action="store", default="f6cb8187-b300-4c2d-9b23-c00e7e98d799")
     parser.addoption("--location", action="store", default="eastus")
     parser.addoption("--policyLocation", action="store", default="eastus")
@@ -28,6 +30,9 @@ def pytest_addoption(parser):
 def subscriptionId(request):
     return request.config.getoption("--subscriptionId")
 
+@pytest.fixture
+def subscriptionIds(request):
+    return request.config.getoption("--subscriptionIds")
 
 @pytest.fixture
 def location(request):
