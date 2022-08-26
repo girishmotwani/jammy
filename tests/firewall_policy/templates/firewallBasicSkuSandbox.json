@@ -72,6 +72,7 @@
 				"jumpboxSubnetPrefix": "10.0.0.0/24",
 				"nextHopIP": "10.0.1.4",
 				"azureFirewallSubnetName": "AzureFirewallSubnet",
+				"azureFirewallMgmtSubnetName": "AzureFirewallManagementSubnet",
 				"jumpBoxSubnetName": "JumpboxSubnet",
 				"serversSubnetName": "ServersSubnet",
 				"jumpBoxPublicIPAddressName": "JumpHostPublicIP",
@@ -185,6 +186,12 @@
 								"name": "[variables('azureFirewallSubnetName')]",
 								"properties": {
 									"addressPrefix": "[variables('azureFirewallSubnetPrefix')]"
+								}
+							},
+							{
+								"name": "[variables('azureFirewallMgmtSubnetName')]",
+								"properties": {
+									"addressPrefix": "[variables('azureFirewallMgmtSubnetPrefix')]"
 								}
 							},
 							{
