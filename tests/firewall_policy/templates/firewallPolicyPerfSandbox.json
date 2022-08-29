@@ -75,7 +75,7 @@
 				"azureFirewallSubnetName": "AzureFirewallSubnet",
 				"jumpBoxSubnetName": "JumpboxSubnet",
 				"clientSubnetName": "ClientSubnet",
-				"serverSubnetName": "ClientSubnet",
+				"serverSubnetName": "ServerSubnet",
 				"jumpBoxPublicIPAddressName": "JumpHostPublicIP",
 				"jumpBoxNsgName": "JumpHostNSG",
 				"jumpBoxNicName": "JumpHostNic",
@@ -151,7 +151,7 @@
 							{
 								"name": "ClientNetRoute",
 								"properties": {
-									"addressPrefix": "10.0.2.0/0",
+									"addressPrefix": "10.0.2.0/24",
 									"nextHopType": "VirtualAppliance",
 									"nextHopIpAddress": "[variables('nextHopIP')]"
 								}
@@ -159,7 +159,7 @@
 							{
 								"name": "ServerNetRoute",
 								"properties": {
-									"addressPrefix": "10.0.3.0/0",
+									"addressPrefix": "10.0.3.0/24",
 									"nextHopType": "VirtualAppliance",
 									"nextHopIpAddress": "[variables('nextHopIP')]"
 								}
