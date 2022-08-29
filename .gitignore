@@ -1,4 +1,4 @@
 # python junk
 *__pycache__*
 *.pyc
-.vscode
+*.vscode*
