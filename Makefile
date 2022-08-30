@@ -47,5 +47,5 @@ test-fw-ipg-multiple-clients: ## Run FWM IP Groups test: Creates rules that have
 	@echo $(SUBSCRIPTION_ID2)"==> id2"
 	@echo $(SUBSCRIPTION_ID3)"==> id3"
 	python -m pytest --html=jammy_fwmtest_report.html --self-contained-html --capture=sys -rF tests/firewall_policy/firewall_policy_test.py -k test_create_delete_vnet_fw_with_ipg_multiple_subscriptions \
-	       	--resourceGroup poojaTestfwIPGLimit01 --subscriptionId $(SUBSCRIPTION_ID) --subscriptionIds $(SUBSCRIPTION_ID) $(SUBSCRIPTION_ID2) $(SUBSCRIPTION_ID3) --numrcg 133 --numrc 1  --numrules 3 \
-		--location eastus
+	       	--resourceGroup poojaIPGLimit --subscriptionId $(SUBSCRIPTION_ID) --subscriptionIds $(SUBSCRIPTION_ID) $(SUBSCRIPTION_ID2) $(SUBSCRIPTION_ID3) --numrcg 1 --numrc 70  --numrules 3 \
+		--location eastus2euap
