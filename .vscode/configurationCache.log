@@ -1,1 +1,0 @@
-{"buildTargets":["auth-and-test","install","setup","setup-windows","test","test-fw-ipg","test-fw-ipg-multiple-clients","test-vwan"],"launchTargets":[],"customConfigurationProvider":{"workspaceBrowse":{"browsePath":[],"compilerArgs":[]},"fileIndex":[]}}

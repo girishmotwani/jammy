@@ -1,9 +1,0 @@
-make.exe --dry-run --always-make --keep-going --print-directory
-make: Entering directory 'd:/jammy'
-pip3 install  --trusted-host pypi.org --trusted-host files.pythonhosted.org -r requirements.txt --upgrade \
-cd lib && pip3 install --user -e .
-make: Leaving directory 'd:/jammy'
- 
-process_begin: CreateProcess(NULL, uname, ...) failed.
-Makefile:3: pipe: No error
-
