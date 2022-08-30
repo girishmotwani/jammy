@@ -1,3 +1,7 @@
 # python junk
 *__pycache__*
 *.pyc
+
+lib/*
+.vscode/
+.vscode
