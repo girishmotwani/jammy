@@ -415,7 +415,11 @@ class TestFirewallPolicy:
         fp = FirewallPolicy()
         fp.location = location
         fp.resourceGroup = resourceGroup
-        resource_group_id = '/subscriptions/' + subscriptionIds[0] + '/resourceGroups/' + resourceGroup
+        resource_group_id = '/subscriptions/' + subscriptionId + '/resourceGroups/' + resourceGroup
+
+        if subscriptionIds is None:
+            subscriptionIds = []
+            subscriptionIds.append(subscriptionId)
         
         # first deploy the ARM template 
         template_file = os.path.join(os.path.dirname(__file__), 'templates', 'firewallPolicySandbox.json')
