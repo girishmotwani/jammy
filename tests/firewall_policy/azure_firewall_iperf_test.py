@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 CLIENT_PRIVATE_IP="10.0.2.4"
+SERVER_PRIVATE_IP="10.0.3.4"
 
 class TestAzureFirewallDatapath:
 
@@ -49,17 +50,17 @@ class TestAzureFirewallDatapath:
         net_rule.ip_protocols = protocols 
         return net_rule 
 
-    def test_vnet_fw_datapath(self, setup_rg, subscriptionId, location, resourceGroup):
+    def test_iperf_tcp_fw_datapath(self, setup_rg, subscriptionId, location, resourceGroup):
         fp = FirewallPolicy()
         fp.location = location
         fp.resourceGroup = resourceGroup
         resource_group_id = '/subscriptions/' + subscriptionId + '/resourceGroups/' + resourceGroup 
         
         # first deploy the ARM template 
-        template_file = os.path.join(os.path.dirname(__file__), 'templates', 'firewallPolicySandbox.json')
-        self.cl.deploy_template(subscriptionId, "test-deployment", resourceGroup, location, template_file)
+        template_file = os.path.join(os.path.dirname(__file__), 'templates', 'firewallPolicyPerfSandbox.json')
+        self.cl.deploy_template(subscriptionId, "perf-deployment", resourceGroup, location, template_file)
        
-        logger.info("test_create_delete_vnet_fw: Step 1: Deploying sandbox template succeeded")
+        logger.info("test_iperf_tcp_fw_datapath Step 1: Deploying sandbox template succeeded")
         # create firewall policy 
         resourceId = resource_group_id + '/providers/Microsoft.Network/firewallPolicies/jammyFP02'
         resp = self.put_firewall_policy(resourceId, fp)
@@ -68,11 +69,11 @@ class TestAzureFirewallDatapath:
         rcg_id = resourceId + '/ruleCollectionGroups/rcg01'
 
         net_rule = NetworkRule()
-        net_rule.name = 'google_dns'
-        net_rule.source_addresses = ['10.1.0.0/24']
-        net_rule.destination_addresses = ['8.8.8.8', '8.8.8.4']
-        net_rule.destination_ports = ["53"]
-        net_rule.ip_protocols = [FirewallPolicyRuleNetworkProtocol.udp]
+        net_rule.name = 'allow_all'
+        net_rule.source_addresses = ['*']
+        net_rule.destination_addresses = ['*']
+        net_rule.destination_ports = ['*']
+        net_rule.ip_protocols = [FirewallPolicyRuleNetworkProtocol.any]
         rule_list = []
         rule_list.append(net_rule)
         
@@ -93,7 +94,7 @@ class TestAzureFirewallDatapath:
         resourceJson = json.dumps(rcg.serialize())
         resp = self.cl.put_resource(rcg_id, resourceJson, "2021-05-01")
 
-        logger.info("test_create_delete_vnet_fw: Step 2: Create FP with RuleCollectionGroup succeeded")
+        logger.info("test_iperf_tcp_fw_datapath  Step 2: Create FP with RuleCollectionGroup succeeded")
         # now associate the firewall policy with the firewall deployed.
         fw_resourceId = resource_group_id + '/providers/Microsoft.Network/azureFirewalls/' + 'firewall1' 
         resp = self.cl.get_resource(fw_resourceId , "2020-07-01")
@@ -108,7 +109,7 @@ class TestAzureFirewallDatapath:
         updated_policy = self.get_firewall_policy(resourceId) 
 
         assert len(updated_policy.firewalls) > 0 , "No firewalls associated with firewall policy"
-        logger.info("test_create_delete_vnet_fw: Step 3: Associate FP with Firewall succeeded")
+        logger.info("test_perf_tcp_fw_datapath: Step 3: Associate FP with Firewall succeeded")
 
         # now test datapath. 
         # 1. get the PIP address for the jumpbox
@@ -128,7 +129,26 @@ class TestAzureFirewallDatapath:
         client_machine.ssh_hop = jumpbox
         client_machine.private_ip = CLIENT_PRIVATE_IP
         client_machine.private_key_path = os.path.join(os.path.dirname(__file__), 'keys', 'jammytest.pem')
+
+        server_machine = Ubuntu()
+        server_machine.username = "gsauser"
+        server_machine.ssh_hop = jumpbox
+        server_machine.private_ip = SERVER_PRIVATE_IP
+        server_machine.private_key_path = os.path.join(os.path.dirname(__file__), 'keys', 'jammytest.pem')
+        
+        # install iperf on the server
         try:
-            result = client_machine.exec_command('curl http://www.google.com')
+            result = server_machine.install('iperf')
         except CommandError:
-            logger.info('Access to http://www.google.com denied as expected as there is no firewall rule to allow traffic')
+            logger.info('Failed to install iperf on the server machine')
+        # start the iperf server
+        server_machine.exec_command('iperf -s -p 9000')
+
+        # install iperf on the client
+        try:
+            result = client_machine.install('iperf')            
+        except CommandError:
+            logger.info('Failed to install iperf on the client machine')
+        output, exit_status = client_machine.exec_command('iperf -p 9000 -c 10.0.3.4 -d')
+        logger.info('iperf result %s', output)
+        

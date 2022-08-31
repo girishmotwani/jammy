@@ -32,7 +32,7 @@ class Ubuntu(Linux):
         """
 
         return self.exec_command("DEBIAN_FRONTEND=noninteractive sudo -s "
-                                 "apt-get -q -y --force-yes install " +
+                                 "apt-get -q -y install " +
                                  app_name, timeout=600, raise_on_error=True)
 
     def is_installed(self, app_name=""):
