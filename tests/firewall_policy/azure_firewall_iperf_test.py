@@ -69,11 +69,11 @@ class TestAzureFirewallDatapath:
         rcg_id = resourceId + '/ruleCollectionGroups/rcg01'
 
         net_rule = NetworkRule()
-        net_rule.name = 'google_dns'
-        net_rule.source_addresses = ['10.1.0.0/24']
-        net_rule.destination_addresses = ['8.8.8.8', '8.8.8.4']
-        net_rule.destination_ports = ["53"]
-        net_rule.ip_protocols = [FirewallPolicyRuleNetworkProtocol.udp]
+        net_rule.name = 'allow_all'
+        net_rule.source_addresses = ['*']
+        net_rule.destination_addresses = ['*']
+        net_rule.destination_ports = ['*']
+        net_rule.ip_protocols = [FirewallPolicyRuleNetworkProtocol.any]
         rule_list = []
         rule_list.append(net_rule)
         
@@ -136,14 +136,19 @@ class TestAzureFirewallDatapath:
         server_machine.private_ip = SERVER_PRIVATE_IP
         server_machine.private_key_path = os.path.join(os.path.dirname(__file__), 'keys', 'jammytest.pem')
         
-        # install iperf on the client
-        try:
-            result = client_machine.install('iperf')
-        except CommandError:
-            logger.info('Failed to install iperf on the client machine')
-        
         # install iperf on the server
         try:
             result = server_machine.install('iperf')
         except CommandError:
             logger.info('Failed to install iperf on the server machine')
+        # start the iperf server
+        server_machine.exec_command('iperf -s -p 9000')
+
+        # install iperf on the client
+        try:
+            result = client_machine.install('iperf')            
+        except CommandError:
+            logger.info('Failed to install iperf on the client machine')
+        output, exit_status = client_machine.exec_command('iperf -p 9000 -c 10.0.3.4 -d')
+        logger.info('iperf result %s', output)
+        

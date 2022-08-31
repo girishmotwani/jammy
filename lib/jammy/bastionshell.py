@@ -125,16 +125,17 @@ class BastionShell():
             self.host,
             self.user)
         try:
-            result = ssh_session.run_cmd(cmd,timeout)
+            result = ssh_session.run_cmd(cmd,timeout=timeout)
         except TimeoutError:
             logger.error("Command %s did not complete in the configured timeout", cmd)
             raise CommandTimeout("timeout exceeded")
         except RunCmdError:
             logger.error("Command %s execution failed", cmd)
+            logger.error("Exception: %s", str(e))
             raise CommandError("command execution failed")
         except Exception as e:
             raise JammyError(str(e))
-        return result.output
+        return result.output, result.exit_code
 
     def disconnect(self):
         if self.remote_session and self.remote_session.is_active():
