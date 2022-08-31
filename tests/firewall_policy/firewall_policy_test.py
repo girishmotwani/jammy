@@ -425,12 +425,12 @@ class TestFirewallPolicy:
         template_file = os.path.join(os.path.dirname(__file__), 'templates', 'firewallPolicySandbox.json')
         for subscriptionId in subscriptionIds:
             self.cl.deploy_template(subscriptionId, "test-deployment", resourceGroup, location, template_file)
-        logger.info("test_create_delete_vnet_fw_with_ipg: Step 1: Deploying sandbox template succeeded")
+        logger.info("test_create_delete_vnet_fw_with_ipg_multiple_subscriptions: Step 1: Deploying sandbox template succeeded")
 
         # create firewall policy 
         resourceId = resource_group_id + '/providers/Microsoft.Network/firewallPolicies/jammyFPIPG'
         resp = self.put_firewall_policy(resourceId, fp)
-        logger.info("test_create_delete_vnet_fw_with_ipg: Step 2: Created FW Policy")
+        logger.info("test_create_delete_vnet_fw_with_ipg_multiple_subscriptions: Step 2: Created FW Policy")
         # create rule collection groups
         for i in range(0, int(num_rcg)):
             rcg = FirewallPolicyRuleCollectionGroup()
@@ -446,25 +446,25 @@ class TestFirewallPolicy:
                 rc.action = allow_action
                 rc.rules = self.get_rule_list_mul_subs(rc.name, subscriptionIds, location, resourceGroup, int(num_rules))
                 rcg.rule_collections.append(rc)
-            logger.info("test_create_delete_vnet_fw_with_ipg: Step 3.%s: Sending Arm request to add RCG", i)
+            logger.info("test_create_delete_vnet_fw_with_ipg_multiple_subscriptions: Step 3.%s: Sending Arm request to add RCG", i)
             rcg_id = resourceId + '/ruleCollectionGroups/rcg' + str(i)
             resourceJson = json.dumps(rcg.serialize())
             resp = self.cl.put_resource(rcg_id, resourceJson, "2020-06-01")
-            logger.info("test_create_delete_vnet_fw_with_ipg: Step 3.%s: Completed Arm request to add RCG:%s", i, rcg_id)
-        logger.info("test_create_delete_vnet_fw_with_ipg: Step 3: Completed updating FW policy with RCGs")
+            logger.info("test_create_delete_vnet_fw_with_ipg_multiple_subscriptions: Step 3.%s: Completed Arm request to add RCG:%s", i, rcg_id)
+        logger.info("test_create_delete_vnet_fw_with_ipg_multiple_subscriptions: Step 3: Completed updating FW policy with RCGs")
 
-        logger.info("test_create_delete_vnet_fw_with_ipg: Step 4: Get FW")
+        logger.info("test_create_delete_vnet_fw_with_ipg_multiple_subscriptions: Step 4: Get FW")
         fw_resource_id = resource_group_id + '/providers/Microsoft.Network/azureFirewalls/' + 'firewall1'
         resp = self.cl.get_resource(fw_resource_id, "2020-07-01")
         firewall = AzureFirewall.from_dict(json.loads(resp))
-        logger.info("test_create_delete_vnet_fw_with_ipg: Step 4: Completed Get FW")
+        logger.info("test_create_delete_vnet_fw_with_ipg_multiple_subscriptions: Step 4: Completed Get FW")
 
-        logger.info("test_create_delete_vnet_fw_with_ipg: Step 5: Associate FW Policy and Firewall")
+        logger.info("test_create_delete_vnet_fw_with_ipg_multiple_subscriptions: Step 5: Associate FW Policy and Firewall")
         policy_ref = SubResource()
         policy_ref.id = resourceId
         firewall.firewall_policy = policy_ref
         resp = self.cl.put_resource(firewall.id, json.dumps(firewall.serialize()),  "2020-07-01")
-        logger.info("test_create_delete_vnet_fw_with_ipg: Step 5: Completed Associate FW Policy and Firewall")
+        logger.info("test_create_delete_vnet_fw_with_ipg_multiple_subscriptions: Step 5: Completed Associate FW Policy and Firewall")
 
         # verify that the policy is associated with the firewall
         updated_policy = self.get_firewall_policy(resourceId)
