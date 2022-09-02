@@ -50,7 +50,7 @@ class TestAzureFirewallDatapath:
         net_rule.ip_protocols = protocols 
         return net_rule 
 
-    def test_iperf_tcp_fw_datapath(self, setup_rg, subscriptionId, location, resourceGroup):
+    def test_iperf_single_tcp_conn_fw_datapath(self, setup_rg, subscriptionId, location, resourceGroup):
         fp = FirewallPolicy()
         fp.location = location
         fp.resourceGroup = resourceGroup
@@ -60,7 +60,7 @@ class TestAzureFirewallDatapath:
         template_file = os.path.join(os.path.dirname(__file__), 'templates', 'firewallPolicyPerfSandbox.json')
         self.cl.deploy_template(subscriptionId, "perf-deployment", resourceGroup, location, template_file)
        
-        logger.info("test_iperf_tcp_fw_datapath Step 1: Deploying sandbox template succeeded")
+        logger.info("test_iperf_single_tcp_conn_fw_datapath Step 1: Deploying sandbox template succeeded")
         # create firewall policy 
         resourceId = resource_group_id + '/providers/Microsoft.Network/firewallPolicies/jammyFP02'
         resp = self.put_firewall_policy(resourceId, fp)
@@ -94,7 +94,7 @@ class TestAzureFirewallDatapath:
         resourceJson = json.dumps(rcg.serialize())
         resp = self.cl.put_resource(rcg_id, resourceJson, "2021-05-01")
 
-        logger.info("test_iperf_tcp_fw_datapath  Step 2: Create FP with RuleCollectionGroup succeeded")
+        logger.info("test_iperf_single_tcp_conn_fw_datapath  Step 2: Create FP with RuleCollectionGroup succeeded")
         # now associate the firewall policy with the firewall deployed.
         fw_resourceId = resource_group_id + '/providers/Microsoft.Network/azureFirewalls/' + 'firewall1' 
         resp = self.cl.get_resource(fw_resourceId , "2020-07-01")
@@ -109,7 +109,7 @@ class TestAzureFirewallDatapath:
         updated_policy = self.get_firewall_policy(resourceId) 
 
         assert len(updated_policy.firewalls) > 0 , "No firewalls associated with firewall policy"
-        logger.info("test_perf_tcp_fw_datapath: Step 3: Associate FP with Firewall succeeded")
+        logger.info("test_iperf_single_tcp_conn_fw_datapath: Step 3: Associate FP with Firewall succeeded")
 
         # now test datapath. 
         # 1. get the PIP address for the jumpbox
@@ -149,6 +149,15 @@ class TestAzureFirewallDatapath:
             result = client_machine.install('iperf')            
         except CommandError:
             logger.info('Failed to install iperf on the client machine')
-        output, exit_status = client_machine.exec_command('iperf -p 9000 -c 10.0.3.4 -d')
-        logger.info('iperf result %s', output)
+        
+        output, exit_status = client_machine.exec_command('iperf -p 9000 -c 10.0.3.4 -d | grep -o -E "[0-9]+ Mbits/sec"')
+        logger.info('test_iperf_single_tcp_conn_fw_datapath: iperf result %s', output)
+        for line in output.splitlines():
+            parts = line.split(" ")
+            if len(parts) >= 2:                
+                logger.info("test_iperf_single_tcp_conn_fw_datapath: parts %s, %s", parts[0], parts[1])
+                bandwidth = int(parts[0])
+                assert bandwidth > 650, "Firewall standard SKU single TCP connection supported bandwidth dropped below 650 Mbps"
+
+        logger.info("iperf datapath test to verify performance with 1 TCP connection succeeded")
         
