@@ -129,7 +129,7 @@ class BastionShell():
         except TimeoutError:
             logger.error("Command %s did not complete in the configured timeout", cmd)
             raise CommandTimeout("timeout exceeded")
-        except RunCmdError:
+        except RunCmdError as e:
             logger.error("Command %s execution failed", cmd)
             logger.error("Exception: %s", str(e))
             raise CommandError("command execution failed")

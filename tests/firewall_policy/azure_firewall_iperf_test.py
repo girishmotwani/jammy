@@ -142,7 +142,7 @@ class TestAzureFirewallDatapath:
         except CommandError:
             logger.info('Failed to install iperf on the server machine')
         # start the iperf server
-        server_machine.exec_command('iperf -s -p 9000')
+        server_machine.exec_command('iperf -s -p 9000 &')
 
         # install iperf on the client
         try:
