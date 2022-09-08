@@ -15,13 +15,20 @@ def main():
 	help='Resource Group Name')
     parser.add_argument('--subscriptionId', required=True,
 	help='Subscription Id')
+    parser.add_argument('--subscriptionIds',required=False,
+	help='Subscription Ids', nargs=3)
     parser.add_argument('--filePath', required=True,
 	help='Path of the template file')
     args = parser.parse_args()
+    print(args)
     cl = ArmClient()
 
-    rg = cl.create_resource_group(args.subscriptionId, args.resourceGroup, args.location)
+    if args.subscriptionIds:
+        for subscriptionId in args.subscriptionIds:
+            rg = cl.create_resource_group(subscriptionId, args.resourceGroup, args.location)
+            cl.deploy_template(subscriptionId, "test-deployment", args.resourceGroup, args.location, args.filePath)
     resource_group_id = '/subscriptions/' + args.subscriptionId + '/resourceGroups/' + args.resourceGroup 
+    rg = cl.create_resource_group(args.subscriptionId, args.resourceGroup, args.location)
     cl.deploy_template(args.subscriptionId, "test-deployment", args.resourceGroup, args.location, args.filePath)
 
 if __name__ == '__main__':

@@ -22,6 +22,8 @@ def main():
 	help='Subscription Id')
     parser.add_argument('--policyPath', required=True,
 	help='Path of the customer firewall policy json file')
+    parser.add_argument('--subscriptionIds', required=True,
+	help='Subscription Ids', nargs='*')
     args = parser.parse_args()
     cl = ArmClient()
 
