@@ -404,8 +404,99 @@ class TestFirewallPolicy:
         updated_policy = self.get_firewall_policy(resourceId)
         assert len(updated_policy.firewalls) > 0 , "No firewalls associated with firewall policy"
 
-        #finally delete the resource group
-        #self.cl.delete_resource(resource_group_id, '2019-10-01')      
+        # finally delete the resource group
+        self.cl.delete_resource(resource_group_id, '2019-10-01')
+
+    def create_rcg(self, num_rc, num_rules, rcg_index):
+        rcg = FirewallPolicyRuleCollectionGroup()
+        rcg.priority = 201 + rcg_index
+        rcg.rule_collections = []
+        for j in range(0, int(num_rc)):
+            rc = FirewallPolicyFilterRuleCollection()
+            allow_action = FirewallPolicyFilterRuleCollectionAction()
+            allow_action.type = "ALLOW"
+            rc.rule_collection_type = 'FirewallPolicyFilterRuleCollection'
+            rc.name = "RCG" + str(rcg_index) + "rl" + str(j)
+            rc.priority = 1000 + j
+            rc.action = allow_action
+            rc.rules = []
+            for k in range(0, int(num_rules)):
+                net_rule = NetworkRule()
+                net_rule.name = 'rule' + str(k)
+                net_rule.source_addresses = self.get_ip_addr_list(1)
+                net_rule.destination_addresses = self.get_ip_addr_list(1)
+                net_rule.destination_ports = [str(random.randint(1, 64000))]
+                net_rule.ip_protocols = [FirewallPolicyRuleNetworkProtocol.udp]
+                rc.rules.append(net_rule)
+            rcg.rule_collections.append(rc)
+        return rcg
+
+    def test_create_update_delete_large_rcg(self, setup_rg, subscriptionId, location, resourceGroup):
+        num_rcg = 1
+        num_rc = 5
+        num_rules = 1000
+        self.cl = ArmClient()
+        fp = FirewallPolicy()
+        fp.location = location
+        fp.resourceGroup = resourceGroup
+        resource_group_id = '/subscriptions/' + subscriptionId + '/resourceGroups/' + resourceGroup
+
+        # first deploy the ARM template
+        template_file = os.path.join(os.path.dirname(__file__), 'templates', 'firewallPolicySandbox.json')
+        self.cl.deploy_template(subscriptionId, "test-deployment", resourceGroup, location, template_file)
+        logger.info("test_create_update_delete_large_rcg: Step 1: Deploying sandbox template succeeded")
+
+        # create firewall policy
+        resourceId = resource_group_id + '/providers/Microsoft.Network/firewallPolicies/jammyFPIP'
+        resp = self.put_firewall_policy(resourceId, fp)
+        logger.info("test_create_update_delete_large_rcg: Step 2: Created FW Policy")
+        # create rule collection groups
+        for i in range(0, int(num_rcg)):
+            rcg = self.create_rcg(num_rc, num_rules, i)
+            logger.info("test_create_update_delete_large_rcg: Step 3.%s: Sending Arm request to add RCG", i)
+            rcg_id = resourceId + '/ruleCollectionGroups/rcg' + str(i)
+            resourceJson = json.dumps(rcg.serialize())
+            resp = self.cl.put_resource(rcg_id, resourceJson, "2020-06-01")
+            logger.info("test_create_update_delete_large_rcg: Step 3.%s: Completed Arm request to add  RCG:%s", i,
+                        rcg_id)
+        logger.info("test_create_update_delete_large_rcg: Step 3: Completed updating FW policy with RCGs")
+
+        logger.info("test_create_update_delete_large_rcg: Step 4: Get FW")
+        fw_resource_id = resource_group_id + '/providers/Microsoft.Network/azureFirewalls/' + 'firewall1'
+        resp = self.cl.get_resource(fw_resource_id, "2020-07-01")
+        firewall = AzureFirewall.from_dict(json.loads(resp))
+        logger.info("test_create_delete_vnet_fw_with_ipg: Step 4: Completed Get FW")
+
+        logger.info("test_create_update_delete_large_rcg: Step 5: Associate FW Policy and Firewall")
+        policy_ref = SubResource()
+        policy_ref.id = resourceId
+        firewall.firewall_policy = policy_ref
+        resp = self.cl.put_resource(firewall.id, json.dumps(firewall.serialize()), "2020-07-01")
+        logger.info("test_create_update_delete_large_rcg: Step 5: Completed Associate FW Policy and Firewall")
+
+        # verify that the policy is associated with the firewall
+        updated_policy = self.get_firewall_policy(resourceId)
+        assert len(updated_policy.firewalls) > 0, "No firewalls associated with firewall policy"
+        assert firewall.provisioning_state == 'Succeeded', "Firewall provisioning state is not Succeeded"
+
+        logger.info("test_create_update_delete_large_rcg: Step 6: Update FW policy RCG")
+        resp = self.cl.get_resource(rcg_id, "2020-06-01")
+        rcg = FirewallPolicyRuleCollectionGroup.from_dict(json.loads(resp))
+        rcg.priority = 500
+        resourceJson = json.dumps(rcg.serialize())
+        resp = self.cl.put_resource(rcg_id, resourceJson, "2020-06-01")
+
+        logger.info("test_create_update_delete_large_rcg: Step 7: GET RCG and verify update and FW state")
+        resp = self.cl.get_resource(rcg_id, "2020-06-01")
+        rcg = FirewallPolicyRuleCollectionGroup.from_dict(json.loads(resp))
+        assert rcg.priority == 500, "RCG was not updated successfully"
+        resp = self.cl.get_resource(fw_resource_id, "2020-07-01")
+        firewall = AzureFirewall.from_dict(json.loads(resp))
+        assert firewall.provisioning_state == 'Succeeded', "Firewall provisioning state is not Succeeded"
+
+        # finally delete the resource group
+        # self.cl.delete_resource(resource_group_id, '2019-10-01')
+
     
     def test_create_delete_vnet_fw_with_ipg_multiple_subscriptions(self, setup_rg, subscriptionId, location, resourceGroup, subscriptionIds, num_rcg, num_rc,
                                             num_rules):

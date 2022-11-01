@@ -41,6 +41,12 @@ test-fw-ipg: ## Run FWM IP Groups test: Creates rules that have IP Groups in src
 	       	--resourceGroup testfwIPG --subscriptionId $(SUBSCRIPTION_ID)  --numrcg 1 --numrc 1 --numrules 1 \
 		--location eastus2euap
 
+test_create_update_delete_large_rcg:
+	@echo $(DISPLAY_BOLD)"==> Running Firewall Policy IP Group tests"$(DISPLAY_RESET)
+	python -m pytest --html=jammy_fwmtest_report.html --self-contained-html --capture=sys -rF tests/firewall_policy/firewall_policy_test.py -k test_create_update_delete_large_rcg\
+	       	--resourceGroup JAMMYtestLargeRcg --subscriptionId $(SUBSCRIPTION_ID)   \
+		--location eastus2euap
+
 test-fw-ipg-multiple-clients: ## Run FWM IP Groups test: Creates rules that have IP Groups in src and dst
 	@echo $(DISPLAY_BOLD)"==> Running Firewall Policy IP Group tests"$(DISPLAY_RESET)
 	@echo $(SUBSCRIPTION_ID)"==> id1"
