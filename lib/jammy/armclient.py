@@ -93,17 +93,18 @@ class ArmClient(object):
         self.wait_for_deployment_complete(resource_id, '2019-10-01')
         return result 
 
-    def put_resource(self, resource_id, resource_json, api_version):
+    def put_resource(self, resource_id, resource_json, api_version, fileprefix=''):
         url = self.base_url + resource_id + '?api-version=' + api_version
         headers = ' ' + '-h "Referer: ' + url + '"'
 
         # write the json to a file
-        with open('tempResource.json', 'w') as fp:
+        file_name = fileprefix + 'tempResource.json'
+        with open(file_name, 'w') as fp:
             fp.write(resource_json)
             # escape the quotes in resource json string
             #resource_json = resource_json.replace('"', r'\"')
         try:
-            cmd = self._armclient + " put " + url + " " + '@' + "tempResource.json" 
+            cmd = self._armclient + " put " + url + " " + '@' + file_name
             output = self.cmd_wrapper(cmd)
 
             result = output.decode("utf-8")

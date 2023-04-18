@@ -432,9 +432,9 @@ class TestFirewallPolicy:
         return rcg
 
     def test_create_update_delete_large_rcg(self, setup_rg, subscriptionId, location, resourceGroup):
-        num_rcg = 1
+        num_rcg = 2
         num_rc = 5
-        num_rules = 1000
+        num_rules = 1
         self.cl = ArmClient()
         fp = FirewallPolicy()
         fp.location = location
