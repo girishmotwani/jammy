@@ -6,6 +6,16 @@ SUBSCRIPTION_ID         := $(AZURE_SUBSCRIPTION_ID)
 SUBSCRIPTION_ID2         := $(AZURE_SUBSCRIPTION_ID1)
 SUBSCRIPTION_ID3         := $(AZURE_SUBSCRIPTION_ID2)
 
+-setup: ## Install/reinstall all required dependencies
+       pip3 install  --trusted-host pypi.org --trusted-host files.pythonhosted.org -r requirements.txt --upgrade \
+       cd lib && pip3 install --user -e .
+
+-setup-windows: ## Install/reinstall all required dependencies
+       pip3 install  --trusted-host pypi.org --trusted-host files.pythonhosted.org -r requirements.txt --upgrade \
+       && cd lib && pip3 install -e .
+
+-install: ## Install python modules
+       cd lib && pip3 install --user -e .
 
 auth-and-test: ## Run FWM feature tests in one job
 	armclient.exe login
