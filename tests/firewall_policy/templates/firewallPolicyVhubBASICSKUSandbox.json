@@ -211,66 +211,12 @@
 					}
 				},
                 {
-                    "type": "Microsoft.Network/firewallPolicies",
-                    "apiVersion": "2020-06-01",
-                    "name": "Policy-01",
-                    "location": "[parameters('location')]",
-                    "properties": {
-                        "threatIntelMode": "Alert"
-                    }
-                },
-                {
-                    "type": "Microsoft.Network/firewallPolicies/ruleCollectionGroups",
-                    "apiVersion": "2020-06-01",
-                    "name": "Policy-01/DefaultApplicationRuleCollectionGroup",
-                    "location": "[parameters('location')]",
-                    "dependsOn": [
-                        "[resourceId('Microsoft.Network/firewallPolicies', 'Policy-01')]"
-                    ],
-                    "properties": {
-                        "priority": 300,
-                        "ruleCollections": [
-                            {
-                                "ruleCollectionType": "FirewallPolicyFilterRuleCollection",
-                                "name": "RC-01",
-                                "priority": 100,
-                                "action": {
-                                    "type": "Allow"
-                                },
-                                "rules": [
-                                    {
-                                        "ruleType": "ApplicationRule",
-                                        "name": "Allow-msft",
-                                        "sourceAddresses": [
-                                            "*"
-                                        ],
-                                        "protocols": [
-                                            {
-                                                "port": "80",
-                                                "protocolType": "http"
-                                            },
-                                            {
-                                                "port": "443",
-                                                "protocolType": "https"
-                                            }
-                                        ],
-                                        "targetFqdns": [
-                                            "*.microsoft.com"
-                                        ]
-                                    }
-                                ]
-                            }
-                        ]
-                    }
-                },
-                {
                     "type": "Microsoft.Network/azureFirewalls",
                     "apiVersion": "2020-06-01",
                     "name": "[variables('firewallName')]",
                     "location": "[parameters('location')]",
                     "dependsOn": [
-                        "[resourceId('Microsoft.Network/virtualHubs', 'Hub-01')]",
-                        "[resourceId('Microsoft.Network/firewallPolicies', 'Policy-01')]"
+                        "[resourceId('Microsoft.Network/virtualHubs', 'Hub-01')]"
                     ],
                     "properties": {
                         "sku": {
@@ -284,9 +230,6 @@
                         },
                         "virtualHub": {
                             "id": "[resourceId('Microsoft.Network/virtualHubs', 'Hub-01')]"
-                        },
-                        "firewallPolicy": {
-                            "id": "[resourceId('Microsoft.Network/firewallPolicies', 'Policy-01')]"
                         }
                     }
                 },

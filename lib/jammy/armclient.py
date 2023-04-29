@@ -37,7 +37,18 @@ class ArmClient(object):
 
     def get_runner_ip():
         ip = get('https://api.ipify.org').content.decode('utf8')
+        logger.debug('Runner IP %s', ip)
         return ip
+
+    def update_template_runner_ip(arm_template_file):
+        with open(arm_template_file, "r+") as jsonFile:
+            data = json.load(jsonFile)
+
+            data["runnerIP"] = get_runner_ip()
+
+            jsonFile.seek(0)  # rewind
+            json.dump(data, jsonFile)
+            jsonFile.truncate()
 
     def get_resource_group_body(self, location):
         body = { "location": location}
