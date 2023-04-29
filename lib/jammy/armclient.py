@@ -6,6 +6,7 @@ import logging
 import sched, time
 import subprocess
 import uuid
+from requests import *
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -32,6 +33,22 @@ class ArmClient(object):
     @base_url.setter
     def base_url(self, value):
         self._base_url = value
+
+
+    def get_runner_ip():
+        ip = get('https://api.ipify.org').content.decode('utf8')
+        logger.debug('Runner IP %s', ip)
+        return ip
+
+    def update_template_runner_ip(arm_template_file):
+        with open(arm_template_file, "r+") as jsonFile:
+            data = json.load(jsonFile)
+
+            data["runnerIP"] = get_runner_ip()
+
+            jsonFile.seek(0)  # rewind
+            json.dump(data, jsonFile)
+            jsonFile.truncate()
 
     def get_resource_group_body(self, location):
         body = { "location": location}

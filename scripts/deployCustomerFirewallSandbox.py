@@ -4,6 +4,7 @@ import json
 import os
 import argparse
 from jammy.armclient import ArmClient
+from jammy.models.ipgroups import *
 from jammy.models.firewallPolicy import *
 from jammy.models.firewallPolicy import version
 
@@ -47,7 +48,16 @@ def main():
                     rcg.id = None
                     rcg.location = args.location
                     rcg_list.append(rcg)
-                else:    
+                else if "IpGroups" in resource_dict['type']:
+                    ip_group = IpGroup.from_dict(resource_dict) 
+                    ip_group.id = None
+                    ip_group.location = args.location
+
+                    ip_group_resource_id = resource_group_id + '/providers/Microsoft.Network/ipgroups/' + resource_dict['name']
+                    print('Creating Resource: ', ip_group_resource_id)
+                    resp = cl.put_resource(ip_group_resource_id, json.dumps(ip_group.serialize()), "2020-08-01")
+
+                else:
                     fp = FirewallPolicy.from_dict(resource_dict)
                     fp.location = args.location
                     fp.resourceGroup = args.resourceGroup

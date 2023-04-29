@@ -71,6 +71,7 @@
 				"jumpboxSubnetPrefix": "10.0.0.0/24",
 				"jumpboxPrivateIp": "10.0.0.4",
 				"nextHopIP": "10.0.1.4",
+				"runnerIP": "10.0.1.4",
 				"azureFirewallSubnetName": "AzureFirewallSubnet",
 				"jumpBoxSubnetName": "JumpboxSubnet",
 				"serversSubnetName": "ServersSubnet",

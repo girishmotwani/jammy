@@ -184,9 +184,9 @@ class TestFirewallPolicy:
         #update the policy rule settings
 
         ftp_rule = NetworkRule()
-        ftp_rule.name = 'ftp'
+        ftp_rule.name = 'Allow_\"internal database\" app to OnPrem`'
         ftp_rule.source_addresses = ['10.1.0.0/24']
-        ftp_rule.destination_addresses = ['52.8.4.1', '80.1.18.4']
+        ftp_rule.destination_addresses = ['52.8.4.1', '80.1.18.4', '52.8.4.1', '52.8.4.1', '52.8.4.1', '52.8.4.1', '52.8.4.1', '52.8.4.1', '52.8.4.1', '52.8.4.1', '52.8.4.1', '52.8.4.1', ]
         ftp_rule.destination_ports = ["21"]
         ftp_rule.ip_protocols = [FirewallPolicyRuleNetworkProtocol.tcp]
 
