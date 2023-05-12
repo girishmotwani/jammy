@@ -48,7 +48,7 @@ class TestAzureFirewallDatapath:
         net_rule.destination_addresses = dest_addresses
         net_rule.destination_ports = ports 
         net_rule.ip_protocols = protocols 
-        return net_rule 
+        return net_rule
 
     def test_iperf_single_tcp_conn_fw_datapath(self, setup_rg, subscriptionId, location, resourceGroup):
         fp = FirewallPolicy()
@@ -138,14 +138,20 @@ class TestAzureFirewallDatapath:
         
         # install iperf on the server
         try:
+            result = server_machine.update_packages()
             result = server_machine.install('iperf')
         except CommandError:
             logger.info('Failed to install iperf on the server machine')
+        
+        logger.info('Starting iperf server on the Server machine')
         # start the iperf server
-        server_machine.exec_command('iperf -s -p 9000 &')
+        output, exit_status = server_machine.exec_command('iperf -s -D -p 9000')
+        if exit_status == 0:
+            logger.info('Successful started iperf server on the Server machine %s', output)
 
         # install iperf on the client
         try:
+            result = client_machine.update_packages()
             result = client_machine.install('iperf')            
         except CommandError:
             logger.info('Failed to install iperf on the client machine')
