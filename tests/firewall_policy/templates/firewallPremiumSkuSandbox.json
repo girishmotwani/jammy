@@ -504,7 +504,11 @@
 						"publicIpCopy"
 					],
 					"properties": {
-						"ipConfigurations": "[variables('azureFirewallIpConfigurations')]"
+						"ipConfigurations": "[variables('azureFirewallIpConfigurations')]",
+						"sku": {
+                                                    "name": "AZFW_VNet",
+                                                    "tier": "Premium"
+                                                }
 					}
 				}
 			]

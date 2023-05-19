@@ -17,7 +17,7 @@
 				},
 				"adminUsername": {
 					"type": "string",
-					"defaultValue": "jammytestuser",
+					"defaultValue": "gsauser",
 					"metadata": {
 						"description": "Username for the Virtual Machine."
 					}
@@ -58,7 +58,7 @@
 				},
 				"adminPasswordOrKey": {
 					"type": "securestring",
-					"defaultValue": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDj5gv1ybwEr9wN2e+TTxxbuKRcNPHEC+Col8CeOkqrAigJjDRjuhw+Iq1BK0w4RFQTzdb+IF9OYgMbL4Apmpp1Rj94mn9M4BrV105xUpdW28ixZJ5duM1F1v7pBBLwpUylFBMhrbfjbJRLCKjQM90jg9Xp6ucpd079NKFXvrPMSpFH7dW8oHBZVQh/cwu/4GyXVHtaAZvefsFAagtcmhKbfY6ymVD+vbWli80WkIH6CoQTyPRJ1giRtGFCNbrwCcDKi8tkOQtHKFJAMra60AQIp/dYB2XBcwMsdcST0fDjn1HOqBEweWVtEBiRemBktoUW8nGys+k70trniW1SOX1qd76YgMTcrB4mwLGse6PT5rB7BudReief74WG18urqVfdOq+HgAQjW+/wsGUIG00aXy8Eqnls9MPZB02vEfOO0/CgTDjZ6g4HA+KvGE82BktAiwAcVrXpoF60Og4A3/OfUG/eqdHelixH/Q8EX5wC+0/hpFmsaxFKP7dN+UY8Jus= gimotwan@DESKTOP-SUVC9U8",
+					"defaultValue": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCpaQl5ASt0FlPjPoMDabG1QJHM5EIoMOGq+FlpHcTEsGrP5Cu1MdLr6/l84qs4Q7TsZ1JO1pAqEAn5lo2ZRhSlt+Afa/J6OatqlTWl50wYh5DPptSCLdXkIcMIr2GqvrlZQWPppLDMzIRxf1ILjKAV1UYNCyS+Qk5sA2dMry/ZZ3pSGLpukH7+N9X0hLR665iCvoZ/vku5hUbYMVKtmqODowaHjRzksAooqM9d3iz3MSqGRcW21qjC23Ooc/tfFnHl+wngsCkWRO5KXwuM4GtS1tAzLkL1xB7bJprYij9u5JYZKt7fzvKWD/7KbTFGnXEOpqAsElaDTYNOqRqh1mp87QEVPdhgAvsgJDJk76XBg7A8dJqfb3YxPsK/7LWB7YHreprf+wr7q/tat0Vj46df0+X4ocxX2xjEh8JjDVlPQXpFKmqtAop1Ls5fV3bwCZJ2pvhF5zeC7hMvlK54cmJkIz4YwOTG8zi52o1E97yI6Wc0dGmnRF+O7LRARJKJIq0= generated-by-azure",
 					"metadata": {
 						"description": "SSH Key or password for the Virtual Machine. SSH key is recommended."
 					}
@@ -66,27 +66,34 @@
 			},
 			"variables": {
 				"vnetAddressPrefix": "10.0.0.0/16",
-				"serversSubnetPrefix": "10.0.2.0/24",
+				"clientSubnetPrefix": "10.0.2.0/24",
+				"serverSubnetPrefix": "10.0.3.0/24",
 				"azureFirewallSubnetPrefix": "10.0.1.0/24",
-				"azureFirewallMgmtSubnetPrefix": "10.0.3.0/24",
+				"azureFirewallMgmtSubnetPrefix": "10.0.4.0/24",
 				"jumpboxSubnetPrefix": "10.0.0.0/24",
+				"jumpboxPrivateIp": "10.0.0.4",
 				"nextHopIP": "10.0.1.4",
 				"azureFirewallSubnetName": "AzureFirewallSubnet",
-				"azureFirewallMgmtSubnetName": "AzureFirewallManagementSubnet",
 				"jumpBoxSubnetName": "JumpboxSubnet",
-				"serversSubnetName": "ServersSubnet",
+				"clientSubnetName": "ClientSubnet",
+				"azureFirewallMgmtSubnetName": "AzureFirewallManagementSubnet",
+				"serverSubnetName": "ServerSubnet",
 				"jumpBoxPublicIPAddressName": "JumpHostPublicIP",
 				"jumpBoxNsgName": "JumpHostNSG",
 				"jumpBoxNicName": "JumpHostNic",
 				"jumpBoxSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), variables('jumpBoxSubnetName'))]",
+				"clientNicName": "ClientNic",
+				"clientPrivateIp": "10.0.2.4",
+				"clientSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), variables('clientSubnetName'))]",
 				"serverNicName": "ServerNic",
-				"serverSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), variables('serversSubnetName'))]",
+				"serverPrivateIp": "10.0.3.4",
+				"serverSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), variables('serverSubnetName'))]",
 				"storageAccountName": "[concat(uniquestring(resourceGroup().id), 'sajumpbox')]",
 				"azfwRouteTableName": "AzfwRouteTable",
 				"firewallName": "firewall1",
 				"publicIPNamePrefix": "publicIP",
 				"managementPublicIpName": "AzFwManagementPublicIP",
-        		"managementPublicIpId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('managementPublicIpName'))]",
+                  		"managementPublicIpId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('managementPublicIpName'))]",
 				"azureFirewallSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets',parameters('virtualNetworkName'), variables('azureFirewallSubnetName'))]",
 				"azureFirewallMgmtSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets',parameters('virtualNetworkName'), variables('azureFirewallMgmtSubnetName'))]",
 				"azureFirewallSubnetJSON": "[json(format('{{\"id\": \"{0}\"}}', variables('azureFirewallSubnetId')))]",
@@ -116,7 +123,7 @@
 						]
 					}
 				},
-				"networkSecurityGroupName": "[concat(variables('serversSubnetName'), '-nsg')]"
+				"networkSecurityGroupName": "[concat(variables('clientSubnetName'), '-nsg')]"
 			},
 			"resources": [
 				{
@@ -145,12 +152,28 @@
 									"nextHopType": "VirtualAppliance",
 									"nextHopIpAddress": "[variables('nextHopIP')]"
 								}
+							},
+							{
+								"name": "ClientNetRoute",
+								"properties": {
+									"addressPrefix": "10.0.2.0/24",
+									"nextHopType": "VirtualAppliance",
+									"nextHopIpAddress": "[variables('nextHopIP')]"
+								}
+							},
+							{
+								"name": "ServerNetRoute",
+								"properties": {
+									"addressPrefix": "10.0.3.0/24",
+									"nextHopType": "VirtualAppliance",
+									"nextHopIpAddress": "[variables('nextHopIP')]"
+								}
 							}
 						]
 					}
 				},
 				{
-					"comments": "Simple Network Security Group for subnet [variables('serversSubnetName')]",
+					"comments": "Simple Network Security Group for subnet [variables('clientSubnetName')]",
 					"type": "Microsoft.Network/networkSecurityGroups",
 					"apiVersion": "2020-05-01",
 					"name": "[variables('networkSecurityGroupName')]",
@@ -195,9 +218,21 @@
 								}
 							},
 							{
-								"name": "[variables('serversSubnetName')]",
+								"name": "[variables('serverSubnetName')]",
 								"properties": {
-									"addressPrefix": "[variables('serversSubnetPrefix')]",
+									"addressPrefix": "[variables('serverSubnetPrefix')]",
+									"routeTable": {
+										"id": "[resourceId('Microsoft.Network/routeTables', variables('azfwRouteTableName'))]"
+									},
+									"networkSecurityGroup": {
+										"id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+									}
+								}
+							},
+							{
+								"name": "[variables('clientSubnetName')]",
+								"properties": {
+									"addressPrefix": "[variables('clientSubnetPrefix')]",
 									"routeTable": {
 										"id": "[resourceId('Microsoft.Network/routeTables', variables('azfwRouteTableName'))]"
 									},
@@ -286,7 +321,8 @@
 							{
 								"name": "ipconfig1",
 								"properties": {
-									"privateIPAllocationMethod": "Dynamic",
+									"privateIPAllocationMethod": "Static",
+									"privateIPAddress": "[variables('jumpboxPrivateIp')]",
 									"publicIPAddress": {
 										"id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('jumpBoxPublicIPAddressName'))]"
 									},
@@ -304,6 +340,29 @@
 				{
 					"apiVersion": "2020-05-01",
 					"type": "Microsoft.Network/networkInterfaces",
+					"name": "[variables('ClientNicName')]",
+					"location": "[parameters('location')]",
+					"dependsOn": [
+						"[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]"
+					],
+					"properties": {
+						"ipConfigurations": [
+							{
+								"name": "ipconfig1",
+								"properties": {
+									"privateIPAllocationMethod": "Static",
+									"privateIPAddress": "[variables('clientPrivateIp')]",
+									"subnet": {
+										"id": "[variables('clientSubnetId')]"
+									}
+								}
+							}
+						]
+					}
+				},
+				{
+					"apiVersion": "2020-05-01",
+					"type": "Microsoft.Network/networkInterfaces",
 					"name": "[variables('ServerNicName')]",
 					"location": "[parameters('location')]",
 					"dependsOn": [
@@ -314,7 +373,8 @@
 							{
 								"name": "ipconfig1",
 								"properties": {
-									"privateIPAllocationMethod": "Dynamic",
+									"privateIPAllocationMethod": "Static",
+									"privateIPAddress": "[variables('serverPrivateIp')]",
 									"subnet": {
 										"id": "[variables('serverSubnetId')]"
 									}
@@ -357,6 +417,51 @@
 							"networkInterfaces": [
 								{
 									"id": "[resourceId('Microsoft.Network/networkInterfaces', variables('JumpBoxNicName'))]"
+								}
+							]
+						},
+						"diagnosticsProfile": {
+							"bootDiagnostics": {
+								"enabled": true,
+								"storageUri": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))).primaryEndpoints.blob]"
+							}
+						}
+					}
+				},
+				{
+					"name": "Client",
+					"type": "Microsoft.Compute/virtualMachines",
+					"apiVersion": "2019-12-01",
+					"location": "[parameters('location')]",
+					"dependsOn": [
+						"[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+						"[resourceId('Microsoft.Network/networkInterfaces', variables('ClientNicName'))]"
+					],
+					"properties": {
+						"hardwareProfile": {
+							"vmSize": "[parameters('vmSize')]"
+						},
+						"storageProfile": {
+							"imageReference": {
+								"publisher": "Canonical",
+								"offer": "UbuntuServer",
+								"sku": "18.04-LTS",
+								"version": "latest"
+							},
+							"osDisk": {
+								"createOption": "FromImage"
+							}
+						},
+						"osProfile": {
+							"computerName": "Server",
+							"adminUsername": "[parameters('adminUsername')]",
+							"adminPassword": "[parameters('adminPasswordOrKey')]",
+							"linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]"
+						},
+						"networkProfile": {
+							"networkInterfaces": [
+								{
+									"id": "[resourceId('Microsoft.Network/networkInterfaces', variables('ClientNicName'))]"
 								}
 							]
 						},
@@ -436,9 +541,9 @@
 							}
 						},
 						"sku": {
-                            "name": "AZFW_VNet",
-                    		"tier": "Basic"
-               		    }
+                                                    "name": "AZFW_VNet",
+                                                    "tier": "Basic"
+                                                }
 					}
 				}
 			]
