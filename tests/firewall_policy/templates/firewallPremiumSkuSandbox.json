@@ -17,7 +17,7 @@
 				},
 				"adminUsername": {
 					"type": "string",
-					"defaultValue": "jammytestuser",
+					"defaultValue": "gsauser",
 					"metadata": {
 						"description": "Username for the Virtual Machine."
 					}
@@ -69,31 +69,28 @@
 				"clientSubnetPrefix": "10.0.2.0/24",
 				"serverSubnetPrefix": "10.0.3.0/24",
 				"azureFirewallSubnetPrefix": "10.0.1.0/24",
-				"azureFirewallMgmtSubnetPrefix": "10.0.4.0/24",
 				"jumpboxSubnetPrefix": "10.0.0.0/24",
+				"jumpboxPrivateIp": "10.0.0.4",
 				"nextHopIP": "10.0.1.4",
 				"azureFirewallSubnetName": "AzureFirewallSubnet",
-				"azureFirewallMgmtSubnetName": "AzureFirewallManagementSubnet",
 				"jumpBoxSubnetName": "JumpboxSubnet",
 				"clientSubnetName": "ClientSubnet",
-				"serversSubnetName": "ServersSubnet",
+				"serverSubnetName": "ServerSubnet",
 				"jumpBoxPublicIPAddressName": "JumpHostPublicIP",
 				"jumpBoxNsgName": "JumpHostNSG",
 				"jumpBoxNicName": "JumpHostNic",
 				"jumpBoxSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), variables('jumpBoxSubnetName'))]",
 				"clientNicName": "ClientNic",
 				"clientPrivateIp": "10.0.2.4",
+				"clientSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), variables('clientSubnetName'))]",
 				"serverNicName": "ServerNic",
 				"serverPrivateIp": "10.0.3.4",
-				"serverSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), variables('serversSubnetName'))]",
+				"serverSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), variables('serverSubnetName'))]",
 				"storageAccountName": "[concat(uniquestring(resourceGroup().id), 'sajumpbox')]",
 				"azfwRouteTableName": "AzfwRouteTable",
 				"firewallName": "firewall1",
 				"publicIPNamePrefix": "publicIP",
-				"managementPublicIpName": "AzFwManagementPublicIP",
-        		        "managementPublicIpId": "[resourceId('Microsoft.Network/publicIPAddresses', variables('managementPublicIpName'))]",
 				"azureFirewallSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets',parameters('virtualNetworkName'), variables('azureFirewallSubnetName'))]",
-				"azureFirewallMgmtSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets',parameters('virtualNetworkName'), variables('azureFirewallMgmtSubnetName'))]",
 				"azureFirewallSubnetJSON": "[json(format('{{\"id\": \"{0}\"}}', variables('azureFirewallSubnetId')))]",
 				"copy": [
 					{
@@ -121,7 +118,7 @@
 						]
 					}
 				},
-				"networkSecurityGroupName": "[concat(variables('serversSubnetName'), '-nsg')]"
+				"networkSecurityGroupName": "[concat(variables('clientSubnetName'), '-nsg')]"
 			},
 			"resources": [
 				{
@@ -171,7 +168,7 @@
 					}
 				},
 				{
-					"comments": "Simple Network Security Group for subnet [variables('serversSubnetName')]",
+					"comments": "Simple Network Security Group for subnet [variables('clientSubnetName')]",
 					"type": "Microsoft.Network/networkSecurityGroups",
 					"apiVersion": "2020-05-01",
 					"name": "[variables('networkSecurityGroupName')]",
@@ -210,13 +207,7 @@
 								}
 							},
 							{
-								"name": "[variables('azureFirewallMgmtSubnetName')]",
-								"properties": {
-									"addressPrefix": "[variables('azureFirewallMgmtSubnetPrefix')]"
-								}
-							},
-							{
-								"name": "[variables('serversSubnetName')]",
+								"name": "[variables('serverSubnetName')]",
 								"properties": {
 									"addressPrefix": "[variables('serverSubnetPrefix')]",
 									"routeTable": {
@@ -253,19 +244,6 @@
 					"copy": {
 						"name": "publicIpCopy",
 						"count": "[parameters('numberOfFirewallPublicIPAddresses')]"
-					},
-					"properties": {
-						"publicIPAllocationMethod": "Static",
-						"publicIPAddressVersion": "IPv4"
-					}
-				},
-				{
-					"type": "Microsoft.Network/publicIPAddresses",
-					"apiVersion": "2019-04-01",
-					"name": "[variables('managementPublicIpName')]",
-					"location": "[parameters('location')]",
-					"sku": {
-						"name": "Standard"
 					},
 					"properties": {
 						"publicIPAllocationMethod": "Static",
@@ -319,7 +297,8 @@
 							{
 								"name": "ipconfig1",
 								"properties": {
-									"privateIPAllocationMethod": "Dynamic",
+									"privateIPAllocationMethod": "Static",
+									"privateIPAddress": "[variables('jumpboxPrivateIp')]",
 									"publicIPAddress": {
 										"id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('jumpBoxPublicIPAddressName'))]"
 									},
@@ -526,21 +505,10 @@
 					],
 					"properties": {
 						"ipConfigurations": "[variables('azureFirewallIpConfigurations')]",
-						"managementIpConfiguration": {
-							"name": "ManagementIpConf",
-							"properties": {
-								"subnet": {
-									"id": "[variables('azureFirewallMgmtSubnetId')]"
-								},
-								"publicIPAddress": {
-									"id": "[variables('managementPublicIpId')]"
-								}
-							}
-						},
 						"sku": {
                                                     "name": "AZFW_VNet",
-                    	    	                    "tier": "Premium"
-               		                        }
+                                                    "tier": "Premium"
+                                                }
 					}
 				}
 			]

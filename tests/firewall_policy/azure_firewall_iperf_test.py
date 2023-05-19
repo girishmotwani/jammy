@@ -4,9 +4,13 @@ Tests for Azure Firewall Datapath
 
 import logging
 import json
+import multiprocessing
 import os
 import pytest
 import random
+import subprocess
+import time
+
 from jammy.armclient import ArmClient
 from jammy.exceptions import CommandError, CommandTimeout, JammyError
 from jammy.jumpbox import JumpBox
@@ -50,21 +54,59 @@ class TestAzureFirewallDatapath:
         net_rule.ip_protocols = protocols 
         return net_rule
 
-    def test_iperf_single_tcp_conn_fw_datapath(self, setup_rg, subscriptionId, location, resourceGroup):
+
+    def start_iperf_server(self, jumpbox_ip):
+        jumpbox = JumpBox()
+        jumpbox.public_ip =jumpbox_ip 
+
+        server_machine = Ubuntu()
+        server_machine.username = "gsauser"
+        server_machine.ssh_hop = jumpbox
+        server_machine.private_ip = SERVER_PRIVATE_IP
+        server_machine.private_key_path = os.path.join(os.path.dirname(__file__), 'keys', 'jammytest.pem')
+        
+        # install iperf on the server
+        try:
+            result = server_machine.update_packages()
+            result = server_machine.install('iperf')
+        except CommandError:
+            logger.info('Failed to install iperf on the server machine')
+        
+        logger.info('Starting iperf server on the Server machine')
+        # start the iperf server
+        output, exit_status = server_machine.exec_command('iperf -s -p 9000')
+        if exit_status == 0:
+            logger.info('Successful started iperf server on the Server machine %s', output)
+
+    def start_iperf_client(self, jumpbox_ip):
+        jumpbox = JumpBox()
+        jumpbox.public_ip =jumpbox_ip 
+
+        client_machine = Ubuntu()
+        client_machine.username = "gsauser"
+        client_machine.ssh_hop = jumpbox
+        client_machine.private_ip = CLIENT_PRIVATE_IP
+        client_machine.private_key_path = os.path.join(os.path.dirname(__file__), 'keys', 'jammytest.pem')
+
+        # install iperf on the client
+        try:
+            result = client_machine.update_packages()
+            result = client_machine.install('iperf')            
+        except CommandError:
+            logger.info('Failed to install iperf on the client machine')
+        
+        return client_machine
+
+    def create_allow_all_firewall_policy(self, subscriptionId, location, resourceGroup, sku):
+        # create firewall policy 
         fp = FirewallPolicy()
         fp.location = location
+        fp.sku = sku
         fp.resourceGroup = resourceGroup
         resource_group_id = '/subscriptions/' + subscriptionId + '/resourceGroups/' + resourceGroup 
-        
-        # first deploy the ARM template 
-        template_file = os.path.join(os.path.dirname(__file__), 'templates', 'firewallPolicyPerfSandbox.json')
-        self.cl.deploy_template(subscriptionId, "perf-deployment", resourceGroup, location, template_file)
-       
-        logger.info("test_iperf_single_tcp_conn_fw_datapath Step 1: Deploying sandbox template succeeded")
-        # create firewall policy 
         resourceId = resource_group_id + '/providers/Microsoft.Network/firewallPolicies/jammyFP02'
         resp = self.put_firewall_policy(resourceId, fp)
-
+        
         # create a rule collection group
         rcg_id = resourceId + '/ruleCollectionGroups/rcg01'
 
@@ -90,80 +132,155 @@ class TestAzureFirewallDatapath:
         rc.action = allow_action
         rc.rules = rule_list
         rcg.rule_collections.append(rc)
-
+        
         resourceJson = json.dumps(rcg.serialize())
         resp = self.cl.put_resource(rcg_id, resourceJson, "2021-05-01")
+        return resourceId
 
-        logger.info("test_iperf_single_tcp_conn_fw_datapath  Step 2: Create FP with RuleCollectionGroup succeeded")
-        # now associate the firewall policy with the firewall deployed.
-        fw_resourceId = resource_group_id + '/providers/Microsoft.Network/azureFirewalls/' + 'firewall1' 
-        resp = self.cl.get_resource(fw_resourceId , "2020-07-01")
+    def associate_firewall_policy(self, firewallId, firewallPolicyId):
+        resp = self.cl.get_resource(firewallId , "2020-07-01")
         firewall = AzureFirewall.from_dict(json.loads(resp))
 
         policy_ref = SubResource()
-        policy_ref.id = resourceId
+        policy_ref.id = firewallPolicyId
         firewall.firewall_policy = policy_ref
         resp = self.cl.put_resource(firewall.id, json.dumps(firewall.serialize()),  "2020-07-01")
 
-        # verify that the policy is associated with the firewall
-        updated_policy = self.get_firewall_policy(resourceId) 
+    def test_premium_sku_iperf(self, subscriptionId, location, resourceGroup):
+        resourceGroup = "Premium" + resourceGroup
+        self.cl = ArmClient()
+        self.rg = self.cl.create_resource_group(subscriptionId, resourceGroup, location)
+        
+        # first deploy the ARM template 
+        resource_group_id = '/subscriptions/' + subscriptionId + '/resourceGroups/' + resourceGroup 
+        template_file = os.path.join(os.path.dirname(__file__), 'templates', 'firewallPremiumSkuSandbox.json')
+        self.cl.deploy_template(subscriptionId, "perf-deployment", resourceGroup, location, template_file)
 
-        assert len(updated_policy.firewalls) > 0 , "No firewalls associated with firewall policy"
-        logger.info("test_iperf_single_tcp_conn_fw_datapath: Step 3: Associate FP with Firewall succeeded")
+        sku = FirewallPolicySku()
+        sku.tier = "Standard"
+        resourceId = self.create_allow_all_firewall_policy(subscriptionId, location, resourceGroup, sku) 
+        
+        # now associate the firewall policy with the firewall deployed.
+        firewallId = resource_group_id + '/providers/Microsoft.Network/azureFirewalls/' + 'firewall1' 
+        self.associate_firewall_policy(firewallId, resourceId)
+        
+        # now test datapath. 
+        # 1. get the PIP address for the jumpbox
+        jumpbox_pip_resource_id = resource_group_id + '/providers/Microsoft.Network/publicIPAddresses/' + 'JumpHostPublicIP'
+        resp = self.cl.get_resource(jumpbox_pip_resource_id, "2022-01-01")
+        publicIP = PublicIPAddress.from_dict(json.loads(resp))
+
+        logger.info("Jumpbox PIP is [%s]", publicIP.ip_address)
+        
+        # start the iperf Server
+        p = multiprocessing.Process(target=self.start_iperf_server, args=(publicIP.ip_address,))
+        p.start()
+       
+        client_machine = self.start_iperf_client(publicIP.ip_address)
+        time.sleep(30)
+        output, exit_status = client_machine.exec_command('iperf -p 9000 -c 10.0.3.4 -d | grep -o -E "[0-9]+ Mbits/sec"')
+        logger.info('test_standard_sku_iperf: iperf result %s', output)
+        
+        # terminate the server process
+        p.terminate()
+        #finally delete the resource group
+        #self.cl.delete_resource(resource_group_id, '2019-10-01')
+
+    def test_standard_sku_iperf(self, setup_rg, subscriptionId, location, resourceGroup):
+       
+        # first deploy the ARM template 
+        resource_group_id = '/subscriptions/' + subscriptionId + '/resourceGroups/' + resourceGroup 
+        template_file = os.path.join(os.path.dirname(__file__), 'templates', 'firewallPolicyPerfSandbox.json')
+        self.cl.deploy_template(subscriptionId, "perf-deployment", resourceGroup, location, template_file)
+       
+        logger.info("test_standard_sku_iperf (Step 1: Deploying sandbox template succeeded")
+
+        sku = FirewallPolicySku()
+        sku.tier = "Standard"
+        resourceId = self.create_allow_all_firewall_policy(subscriptionId, location, resourceGroup, sku) 
+        
+        # now associate the firewall policy with the firewall deployed.
+        firewallId = resource_group_id + '/providers/Microsoft.Network/azureFirewalls/' + 'firewall1' 
+        self.associate_firewall_policy(firewallId, resourceId)
 
         # now test datapath. 
         # 1. get the PIP address for the jumpbox
-
         jumpbox_pip_resource_id = resource_group_id + '/providers/Microsoft.Network/publicIPAddresses/' + 'JumpHostPublicIP'
         resp = self.cl.get_resource(jumpbox_pip_resource_id, "2022-01-01")
         publicIP = PublicIPAddress.from_dict(json.loads(resp))
 
         logger.info("Jumpbox PIP is [%s]", publicIP.ip_address)
 
-        # 2. Now connect to the client machine via Jumpbox
-        jumpbox = JumpBox()
-        jumpbox.public_ip = publicIP.ip_address
-
-        client_machine = Ubuntu()
-        client_machine.username = "gsauser"
-        client_machine.ssh_hop = jumpbox
-        client_machine.private_ip = CLIENT_PRIVATE_IP
-        client_machine.private_key_path = os.path.join(os.path.dirname(__file__), 'keys', 'jammytest.pem')
-
-        server_machine = Ubuntu()
-        server_machine.username = "gsauser"
-        server_machine.ssh_hop = jumpbox
-        server_machine.private_ip = SERVER_PRIVATE_IP
-        server_machine.private_key_path = os.path.join(os.path.dirname(__file__), 'keys', 'jammytest.pem')
-        
-        # install iperf on the server
-        try:
-            result = server_machine.update_packages()
-            result = server_machine.install('iperf')
-        except CommandError:
-            logger.info('Failed to install iperf on the server machine')
-        
-        logger.info('Starting iperf server on the Server machine')
-        # start the iperf server
-        output, exit_status = server_machine.exec_command('iperf -s -D -p 9000')
-        if exit_status == 0:
-            logger.info('Successful started iperf server on the Server machine %s', output)
-
-        # install iperf on the client
-        try:
-            result = client_machine.update_packages()
-            result = client_machine.install('iperf')            
-        except CommandError:
-            logger.info('Failed to install iperf on the client machine')
-        
+        p = multiprocessing.Process(target=self.start_iperf_server, args=(publicIP.ip_address,))
+        p.start()
+       
+        client_machine = self.start_iperf_client(publicIP.ip_address)
+        time.sleep(30)
         output, exit_status = client_machine.exec_command('iperf -p 9000 -c 10.0.3.4 -d | grep -o -E "[0-9]+ Mbits/sec"')
-        logger.info('test_iperf_single_tcp_conn_fw_datapath: iperf result %s', output)
+        logger.info('test_standard_sku_iperf: iperf result %s', output)
+        
+        # terminate the server process
+        p.terminate()
+
+        #finally delete the resource group
+        #self.cl.delete_resource(resource_group_id, '2019-10-01')
+        #verify the result
         for line in output.splitlines():
             parts = line.split(" ")
             if len(parts) >= 2:                
-                logger.info("test_iperf_single_tcp_conn_fw_datapath: parts %s, %s", parts[0], parts[1])
+                logger.info("test_standard_sku_iperf: parts %s, %s", parts[0], parts[1])
                 bandwidth = int(parts[0])
                 assert bandwidth > 650, "Firewall standard SKU single TCP connection supported bandwidth dropped below 650 Mbps"
 
         logger.info("iperf datapath test to verify performance with 1 TCP connection succeeded")
+
+    def test_basic_sku_iperf(self, subscriptionId, location, resourceGroup):
+      
+        resourceGroup = "Basic" + resourceGroup
+        self.cl = ArmClient()
+        self.rg = self.cl.create_resource_group(subscriptionId, resourceGroup, location)
+        # first deploy the ARM template 
+        resource_group_id = '/subscriptions/' + subscriptionId + '/resourceGroups/' + resourceGroup 
+        template_file = os.path.join(os.path.dirname(__file__), 'templates', 'firewallBasicSkuSandbox.json')
+        self.cl.deploy_template(subscriptionId, "perf-deployment", resourceGroup, location, template_file)
+       
+        logger.info("test_standard_sku_iperf (Step 1: Deploying sandbox template succeeded")
+
+        sku = FirewallPolicySku()
+        sku.tier = "Basic"
+        resourceId = self.create_allow_all_firewall_policy(subscriptionId, location, resourceGroup, sku) 
         
+        # now associate the firewall policy with the firewall deployed.
+        firewallId = resource_group_id + '/providers/Microsoft.Network/azureFirewalls/' + 'firewall1' 
+        self.associate_firewall_policy(firewallId, resourceId)
+
+        # now test datapath. 
+        # 1. get the PIP address for the jumpbox
+        jumpbox_pip_resource_id = resource_group_id + '/providers/Microsoft.Network/publicIPAddresses/' + 'JumpHostPublicIP'
+        resp = self.cl.get_resource(jumpbox_pip_resource_id, "2022-01-01")
+        publicIP = PublicIPAddress.from_dict(json.loads(resp))
+
+        logger.info("Jumpbox PIP is [%s]", publicIP.ip_address)
+
+        p = multiprocessing.Process(target=self.start_iperf_server, args=(publicIP.ip_address,))
+        p.start()
+       
+        client_machine = self.start_iperf_client(publicIP.ip_address)
+        time.sleep(30)
+        output, exit_status = client_machine.exec_command('iperf -p 9000 -c 10.0.3.4 -d | grep -o -E "[0-9]+ Mbits/sec"')
+        logger.info('test_standard_sku_iperf: iperf result %s', output)
+        
+        # terminate the server process
+        p.terminate()
+
+        #finally delete the resource group
+        #self.cl.delete_resource(resource_group_id, '2019-10-01')
+        #verify the result
+        for line in output.splitlines():
+            parts = line.split(" ")
+            if len(parts) >= 2:                
+                logger.info("test_standard_sku_iperf: parts %s, %s", parts[0], parts[1])
+                bandwidth = int(parts[0])
+                assert bandwidth > 650, "Firewall standard SKU single TCP connection supported bandwidth dropped below 650 Mbps"
+
+        logger.info("iperf datapath test to verify performance with 1 TCP connection succeeded")
