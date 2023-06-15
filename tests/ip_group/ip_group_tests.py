@@ -52,9 +52,9 @@ class TestIPGroup:
 
         # first deploy the ARM template
         logger.info("test_create_delete_vnet_fw_with_ipg: Step 1: Deploying sandbox template")
-        template_file = os.path.join(os.path.dirname(__file__), '../firewall_policy/templates','firewallPolicySandbox.json')
+        template_file = os.path.join(os.path.dirname(__file__), '../firewall_policy/templates','firewallPremiumSkuSandbox.json')
         self._cl.deploy_template(subscriptionId, "test-deployment", resourceGroup, location, template_file)
-        logger.info("test_create_delete_vnet_fw_with_ipg: Step 1: Deploying sandbox template succeeded")
+        logger.info("test_create_vnet_fw_with_ipg: Step 1: Deploying sandbox template succeeded")
 
         # create firewall policy
         logger.info("test_create_delete_vnet_fw_with_ipg: Step 2: Creating FW policy")
@@ -145,6 +145,47 @@ class TestIPGroup:
         logger.info("completed all ip group update threads")
         logger.info("test_ipg_update_parallel: Result: %s", result)
         assert [r for r in result if r == "Succeeded"], 'IP Groups failed to update'
+
+
+    def test_ipg_update_continuous(self, setup_rg, subscriptionId, location, resourceGroup, num_rcg, num_rc, num_rules):
+        ipg_util = IpGroupUtil(subscriptionId, location, resourceGroup, self._cl)
+        ipg_update_jobs = []
+        global result
+
+        t_num = 0
+        logger.info("test_ipg_update_continuous: Result: %s", result)
+        count = 0
+        failed_count = 0
+        passed_count = 0
+        print("Passed_counts:")
+        time.sleep(120)
+        while count < 4:
+            count = count + 1
+            for rcg_index in range(0, int(num_rcg)):
+                for rc_index in range(0, int(num_rc)):
+                    for rules_index in range(0, int(num_rules)):
+                        ids = ipg_util.get_ipg_resource_id(rcg_index, rc_index, rules_index, "ipgs")
+                        tag_s = ipg_util.get_ipg_tag(rcg_index, rc_index, rules_index, "ipgs")
+                        logger.info("test_ipg_update_continuous: Started add IP for IPG:%s", ids)
+                        resp = ipg_util.update_ipg(ids, ["1.2.3.4"], [], tag_s)
+                        logger.info("test_ipg_update_continuous: Completed update for IPG:%s Resp:%s", ids, resp)
+                        print("test_ipg_update_continuous: Completed update for IPG:%s Resp:%s", ids, resp)
+                        if resp == 'Succeeded':
+                            passed_count = passed_count + 1
+                        else:
+                            failed_count = failed_count + 1
+                        time.sleep(120)
+                        logger.info("test_ipg_update_continuous: Started delete IP for IPG:%s", ids)
+                        resp = ipg_util.update_ipg(ids, [], ["1.2.3.4"],  tag_s)
+                        logger.info("test_ipg_update_continuous: Completed update for IPG:%s Resp:%s", ids, resp)
+                        print("test_ipg_update_continuous: Completed update for IPG:%s Resp:%s", ids, resp)
+                        if resp == 'Succeeded':
+                            passed_count = passed_count + 1
+                        else:
+                            failed_count = failed_count + 1
+                        time.sleep(120)
+        print("Passed_count:", passed_count, "failed_count:",failed_count)
+
 
     def test_create_policy_with_ipg(self, setup_rg, subscriptionId, location, resourceGroup, num_rcg, num_rc,
                                             num_rules):

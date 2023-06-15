@@ -52,13 +52,13 @@ test-vent-fwp-ipg-setup: ## Run FWM IP Groups test: Creates rules that have IP G
 test-fwp-ipg-setup: ## Creates setup to run  FWM IP Groups test: Creates rules that have IP Groups in src and dst
 	@echo $(DISPLAY_BOLD)"==> Running IP Groups setup Creation"$(DISPLAY_RESET)
 	python -m pytest --html=jammy_fwmtest_report.html --self-contained-html --capture=sys -rF tests/ip_group/ip_group_tests.py -k test_create_vnet_fw_with_ipg \
-	       	--resourceGroup JAMMYTEST_IPG_eastus2euap_1 --subscriptionId 7a06e974-7329-4485-87e7-3211b06c15aa  --numrcg 5 --numrc 1 --numrules 5 \
-		--location eastus2euap
+	       	--resourceGroup BUG_BASH_IPG_northcentralus_setup --subscriptionId f6cb8187-b300-4c2d-9b23-c00e7e98d799  --numrcg 5 --numrc 1 --numrules 5 \
+		--location northcentralus
 
 test-fwp-ipg-update-parallel: ## Run FWM IP Groups test: tests updating IP groups in parallel. Run after 'test-fwp-ipg-setup'
 	@echo $(DISPLAY_BOLD)"==> Running IP Groups Parallel Update"$(DISPLAY_RESET)
 	python -m pytest --html=jammy_fwmtest_report.html --self-contained-html --capture=sys -rF tests/ip_group/ip_group_tests.py -k test_ipg_update_parallel \
-	       	--resourceGroup JAMMYTEST_IPG_eastus2euap_1 --subscriptionId 8897e8a2-84e5-44d7-915d-60188052a731  --numrcg 1 --numrc 1 --numrules 3 \
+	       	--resourceGroup JAMMYTEST_IPG_eastus2euap_3 --subscriptionId 8897e8a2-84e5-44d7-915d-60188052a731  --numrcg 5 --numrc 1 --numrules 5 \
 		--location eastus2euap
 
 test-fwp-ipg-setup-delete: ## Creates setup to run  FWM IP Groups test
@@ -67,8 +67,17 @@ test-fwp-ipg-setup-delete: ## Creates setup to run  FWM IP Groups test
 	       	--resourceGroup JAMMYTEST_IPG_eastus2euap_1 --subscriptionId 66de82f3-ad93-4605-bbdb-237fe7ef3a06  \
 		--location eastus2euap
 
+test-fwp-ipg-update-continuous: ## Run FWM IP Groups test: tests updating IP groups. Run after 'test-fwp-ipg-setup'
+	@echo $(DISPLAY_BOLD)"==> Running IP Groups Parallel Update"$(DISPLAY_RESET)
+	python -m pytest --html=jammy_test-fwp-ipg-update-continuous_30_report.html --self-contained-html --capture=tee-sys -rF tests/ip_group/ip_group_tests.py -k test_ipg_update_continuous \
+	       	--resourceGroup BUG_BASH_IPG_westcentralus --subscriptionId f6cb8187-b300-4c2d-9b23-c00e7e98d799  --numrcg 5 --numrc 1 --numrules 5 \
+		--location westcentralus
 
-
+test-fwp-ipg-update-crossregion: ## Run FWM IP Groups test: tests updating IP groups. Run after 'test-fwp-ipg-setup'
+	@echo $(DISPLAY_BOLD)"==> Running IP Groups cross region"$(DISPLAY_RESET)
+	python -m pytest --html=jammy_fwmtest_report.html --self-contained-html --capture=sys -rF tests/ip_group/ip_group_tests.py -k test_ipg_update_crossregion \
+	       	--resourceGroup BUG_BASH_IPG_westcentralus --subscriptionId f6cb8187-b300-4c2d-9b23-c00e7e98d799  --numrcg 5 --numrc 1 --numrules 5 \
+		--location westcentralus
 
 test_create_update_delete_large_rcg:
 	@echo $(DISPLAY_BOLD)"==> Running Firewall Policy IP Group tests"$(DISPLAY_RESET)
@@ -84,3 +93,31 @@ test-fw-ipg-multiple-clients: ## Run FWM IP Groups test: Creates rules that have
 	python -m pytest --html=jammy_fwmtest_report.html --self-contained-html --capture=sys -rF tests/firewall_policy/firewall_policy_test.py -k test_create_delete_vnet_fw_with_ipg_multiple_subscriptions \
 	       	--resourceGroup poojaIPGLimit3 --subscriptionId $(SUBSCRIPTION_ID) --subscriptionIds $(SUBSCRIPTION_ID) $(SUBSCRIPTION_ID2) $(SUBSCRIPTION_ID3) --numrcg 1 --numrc 1  --numrules 3 \
 		--location eastus2euap
+
+
+
+test_create_endurance_setup:
+	@echo $(DISPLAY_BOLD)"==> Creating Basic Endurance Setup A"$(DISPLAY_RESET)
+	python -m pytest --html=jammy_fwmtest_report.html --self-contained-html --capture=sys -rF tests/firewall_policy/azure_firewall_iperf_test.py -k test_basic_sku_iperf \
+	       	--resourceGroup AzureFirewallBasicSkuEnduranceTestRG_A --subscriptionId f6cb8187-b300-4c2d-9b23-c00e7e98d799   \
+		--location eastus2  --policyLocation eastus2
+	@echo $(DISPLAY_BOLD)"==> Creating Basic Endurance Setup B"$(DISPLAY_RESET)
+	python -m pytest --html=jammy_fwmtest_report.html --self-contained-html --capture=sys -rF tests/firewall_policy/azure_firewall_iperf_test.py -k test_basic_sku_iperf \
+	       	--resourceGroup AzureFirewallBasicSkuEnduranceTestRG_B --subscriptionId f6cb8187-b300-4c2d-9b23-c00e7e98d799   \
+		--location eastus2  --policyLocation eastus2
+	@echo $(DISPLAY_BOLD)"==> Creating Standard Endurance Setup A"$(DISPLAY_RESET)
+	python -m pytest --html=jammy_fwmtest_report.html --self-contained-html --capture=sys -rF tests/firewall_policy/azure_firewall_iperf_test.py -k test_standard_sku_iperf \
+	       	--resourceGroup AzureFirewallStandardSkuEnduranceTestRG_A --subscriptionId f6cb8187-b300-4c2d-9b23-c00e7e98d799   \
+		--location eastus2  --policyLocation eastus2
+	@echo $(DISPLAY_BOLD)"==> Creating Standard Endurance Setup B"$(DISPLAY_RESET)
+	python -m pytest --html=jammy_fwmtest_report.html --self-contained-html --capture=sys -rF tests/firewall_policy/azure_firewall_iperf_test.py -k test_standard_sku_iperf \
+	       	--resourceGroup AzureFirewallStandardSkuEnduranceTestRG_B --subscriptionId f6cb8187-b300-4c2d-9b23-c00e7e98d799   \
+		--location eastus2  --policyLocation eastus2
+	@echo $(DISPLAY_BOLD)"==> Creating Premium Endurance Setup A"$(DISPLAY_RESET)
+	python -m pytest --html=jammy_fwmtest_report.html --self-contained-html --capture=sys -rF tests/firewall_policy/azure_firewall_iperf_test.py -k test_premium_sku_iperf \
+	       	--resourceGroup AzureFirewallPremiumSkuEnduranceTestRG_A --subscriptionId f6cb8187-b300-4c2d-9b23-c00e7e98d799   \
+		--location eastus2  --policyLocation eastus2
+	@echo $(DISPLAY_BOLD)"==> Creating Premium Endurance Setup B"$(DISPLAY_RESET)
+	python -m pytest --html=jammy_fwmtest_report.html --self-contained-html --capture=sys -rF tests/firewall_policy/azure_firewall_iperf_test.py -k test_premium_sku_iperf \
+	       	--resourceGroup AzureFirewallPremiumSkuEnduranceTestRG_B --subscriptionId f6cb8187-b300-4c2d-9b23-c00e7e98d799   \
+		--location eastus2  --policyLocation eastus2
