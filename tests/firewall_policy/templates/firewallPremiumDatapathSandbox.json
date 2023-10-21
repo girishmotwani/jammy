@@ -56,6 +56,20 @@
 						"description": "Type of authentication to use on the Virtual Machine. SSH key is recommended."
 					}
 				},
+		    "sigOverrideParam1": {
+      		"type": "string",
+      		"defaultValue": "2024897",
+      		"metadata": {
+        		"description": "Intruder Detection - Signature Overrodes Id 1"
+      		}
+    		},
+    		"sigOverrideParam2": {
+      		"type": "string",
+      		"defaultValue": "2024898",
+      		"metadata": {
+        		"description": "Intruder Detection - Signature Overrodes Id 2"
+      		}
+    		},
 				"adminPasswordOrKey": {
 					"type": "securestring",
 					"defaultValue": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCpaQl5ASt0FlPjPoMDabG1QJHM5EIoMOGq+FlpHcTEsGrP5Cu1MdLr6/l84qs4Q7TsZ1JO1pAqEAn5lo2ZRhSlt+Afa/J6OatqlTWl50wYh5DPptSCLdXkIcMIr2GqvrlZQWPppLDMzIRxf1ILjKAV1UYNCyS+Qk5sA2dMry/ZZ3pSGLpukH7+N9X0hLR665iCvoZ/vku5hUbYMVKtmqODowaHjRzksAooqM9d3iz3MSqGRcW21qjC23Ooc/tfFnHl+wngsCkWRO5KXwuM4GtS1tAzLkL1xB7bJprYij9u5JYZKt7fzvKWD/7KbTFGnXEOpqAsElaDTYNOqRqh1mp87QEVPdhgAvsgJDJk76XBg7A8dJqfb3YxPsK/7LWB7YHreprf+wr7q/tat0Vj46df0+X4ocxX2xjEh8JjDVlPQXpFKmqtAop1Ls5fV3bwCZJ2pvhF5zeC7hMvlK54cmJkIz4YwOTG8zi52o1E97yI6Wc0dGmnRF+O7LRARJKJIq0= generated-by-azure",
@@ -65,33 +79,35 @@
 				}
 			},
 			"variables": {
-				"vnetAddressPrefix": "10.0.0.0/16",
-				"clientSubnetPrefix": "10.0.2.0/24",
-				"serverSubnetPrefix": "10.0.3.0/24",
 				"azureFirewallSubnetPrefix": "10.0.1.0/24",
-				"jumpboxSubnetPrefix": "10.0.0.0/24",
-				"jumpboxPrivateIp": "10.0.0.4",
-				"nextHopIP": "10.0.1.4",
 				"azureFirewallSubnetName": "AzureFirewallSubnet",
-				"jumpBoxSubnetName": "JumpboxSubnet",
+				"azfwRouteTableName": "AzfwRouteTable",
+				"azureFirewallSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets',parameters('virtualNetworkName'), variables('azureFirewallSubnetName'))]",
+				"azureFirewallSubnetJSON": "[json(format('{{\"id\": \"{0}\"}}', variables('azureFirewallSubnetId')))]",
+				"clientSubnetPrefix": "10.0.2.0/24",
 				"clientSubnetName": "ClientSubnet",
-				"serverSubnetName": "ServerSubnet",
-				"jumpBoxPublicIPAddressName": "JumpHostPublicIP",
-				"jumpBoxNsgName": "JumpHostNSG",
-				"jumpBoxNicName": "JumpHostNic",
-				"jumpBoxSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), variables('jumpBoxSubnetName'))]",
 				"clientNicName": "ClientNic",
 				"clientPrivateIp": "10.0.2.4",
 				"clientSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), variables('clientSubnetName'))]",
+				"firewallName": "firewall1",
+				"jumpBoxPublicIPAddressName": "JumpHostPublicIP",
+				"jumpboxSubnetPrefix": "10.0.0.0/24",
+				"jumpBoxSubnetName": "JumpboxSubnet",
+				"jumpboxPrivateIp": "10.0.0.4",
+				"jumpBoxNsgName": "JumpHostNSG",
+				"jumpBoxNicName": "JumpHostNic",
+				"jumpBoxSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), variables('jumpBoxSubnetName'))]",
+				"keyVaultCASecretName": "CaCert",
+				"keyVaultName": "[format('fw-quick-{0}', uniqueString(subscription().id, resourceGroup().id))]",
+				"nextHopIP": "10.0.1.4",
+				"publicIPNamePrefix": "publicIP",
+				"serverSubnetName": "ServerSubnet",
 				"serverNicName": "ServerNic",
 				"serverPrivateIp": "10.0.3.4",
 				"serverSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), variables('serverSubnetName'))]",
+				"serverSubnetPrefix": "10.0.3.0/24",
 				"storageAccountName": "[concat(uniquestring(resourceGroup().id), 'sajumpbox')]",
-				"azfwRouteTableName": "AzfwRouteTable",
-				"firewallName": "firewall1",
-				"publicIPNamePrefix": "publicIP",
-				"azureFirewallSubnetId": "[resourceId('Microsoft.Network/virtualNetworks/subnets',parameters('virtualNetworkName'), variables('azureFirewallSubnetName'))]",
-				"azureFirewallSubnetJSON": "[json(format('{{\"id\": \"{0}\"}}', variables('azureFirewallSubnetId')))]",
+				"vnetAddressPrefix": "10.0.0.0/16",
 				"copy": [
 					{
 						"name": "azureFirewallIpConfigurations",
@@ -613,8 +629,8 @@
       		},
       		"dependsOn": [
         		"[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', 'DemoIdentity')]",
-        			"[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]",
-        			"[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), variables('keyVaultCASecretName'))]"
+        		"[resourceId('Microsoft.KeyVault/vaults', variables('keyVaultName'))]",
+        		"[resourceId('Microsoft.KeyVault/vaults/secrets', variables('keyVaultName'), variables('keyVaultCASecretName'))]"
       		]
 				},
 				{
@@ -710,13 +726,22 @@
 					"type": "Microsoft.Network/azureFirewalls",
 					"name": "[variables('firewallName')]",
 					"location": "[parameters('location')]",
-					"dependsOn": [
+					"properties": {
+						"ipConfigurations": "[variables('azureFirewallIpConfigurations')]",
+						"firewallPolicy": {
+          		"id": "[resourceId('Microsoft.Network/firewallPolicies', 'DemoFirewallPolicy')]"
+        		},
+						"sku": {
+          		"name": "AZFW_VNet",
+          		"tier": "Premium"
+        		}
+					},
+			    "dependsOn": [
+      		  "[resourceId('Microsoft.Network/firewallPolicies', 'DemoFirewallPolicy')]",
+        		"[resourceId('Microsoft.Network/firewallPolicies/ruleCollectionGroups', 'DemoFirewallPolicy', 'PolicyRules')]",
 						"[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
 						"publicIpCopy"
-					],
-					"properties": {
-						"ipConfigurations": "[variables('azureFirewallIpConfigurations')]"
-					}
+     			 ]
 				}
 			]
 		}
