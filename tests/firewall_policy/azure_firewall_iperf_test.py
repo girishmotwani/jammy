@@ -68,15 +68,15 @@ class TestAzureFirewallDatapath:
         # install iperf on the server
         try:
             result = server_machine.update_packages()
-            result = server_machine.install('iperf')
+            result = server_machine.install('iperf3')
         except CommandError:
-            logger.info('Failed to install iperf on the server machine')
+            logger.info('Failed to install iperf3 on the server machine')
         
-        logger.info('Starting iperf server on the Server machine')
+        logger.info('Starting iperf3 server on the Server machine')
         # start the iperf server
-        output, exit_status = server_machine.exec_command('iperf -s -p 9000')
+        output, exit_status = server_machine.exec_command('iperf3 -s -p 9000')
         if exit_status == 0:
-            logger.info('Successful started iperf server on the Server machine %s', output)
+            logger.info('Successful started iperf3 server on the Server machine %s', output)
 
     def start_iperf_client(self, jumpbox_ip):
         jumpbox = JumpBox()
@@ -91,9 +91,9 @@ class TestAzureFirewallDatapath:
         # install iperf on the client
         try:
             result = client_machine.update_packages()
-            result = client_machine.install('iperf')            
+            result = client_machine.install('iperf3')            
         except CommandError:
-            logger.info('Failed to install iperf on the client machine')
+            logger.info('Failed to install iperf3 on the client machine')
         
         return client_machine
 
@@ -179,8 +179,8 @@ class TestAzureFirewallDatapath:
        
         client_machine = self.start_iperf_client(publicIP.ip_address)
         time.sleep(30)
-        output, exit_status = client_machine.exec_command('iperf -p 9000 -c 10.0.3.4 -d | grep -o -E "[0-9]+ Mbits/sec"')
-        logger.info('test_standard_sku_iperf: iperf result %s', output)
+        output, exit_status = client_machine.exec_command('iperf3 -p 9000 -c 10.0.3.4 -d -t 300 | grep -o -E "[0-9]+ Mbits/sec"', timeout=900)
+        logger.info('test_premium_sku_iperf: iperf3 result %s', output)
         
         # terminate the server process
         p.terminate()
@@ -218,8 +218,8 @@ class TestAzureFirewallDatapath:
        
         client_machine = self.start_iperf_client(publicIP.ip_address)
         time.sleep(30)
-        output, exit_status = client_machine.exec_command('iperf -p 9000 -c 10.0.3.4 -d | grep -o -E "[0-9]+ Mbits/sec"')
-        logger.info('test_standard_sku_iperf: iperf result %s', output)
+        output, exit_status = client_machine.exec_command('iperf3 -p 9000 -c 10.0.3.4 -d | grep -o -E "[0-9]+ Mbits/sec"')
+        logger.info('test_standard_sku_iperf: iperf3 result %s', output)
         
         # terminate the server process
         p.terminate()
@@ -269,8 +269,8 @@ class TestAzureFirewallDatapath:
        
         client_machine = self.start_iperf_client(publicIP.ip_address)
         time.sleep(30)
-        output, exit_status = client_machine.exec_command('iperf -p 9000 -c 10.0.3.4 -d | grep -o -E "[0-9]+ Mbits/sec"')
-        logger.info('test_standard_sku_iperf: iperf result %s', output)
+        output, exit_status = client_machine.exec_command('iperf3 -p 9000 -c 10.0.3.4 -d | grep -o -E "[0-9]+ Mbits/sec"')
+        logger.info('test_basic_sku_iperf: iperf3 result %s', output)
         
         # terminate the server process
         p.terminate()
