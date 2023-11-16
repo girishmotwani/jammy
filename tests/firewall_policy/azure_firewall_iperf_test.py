@@ -146,7 +146,6 @@ class TestAzureFirewallDatapath:
         firewall.firewall_policy = policy_ref
         resp = self.cl.put_resource(firewall.id, json.dumps(firewall.serialize()),  "2020-07-01")
 
-    @pytest.mark.skip(reason="The runner VM is unable to connect to the test resources")
     def test_premium_sku_iperf(self, subscriptionId, location, resourceGroup):
         resourceGroup = "Premium" + resourceGroup
         self.cl = ArmClient()
@@ -157,6 +156,8 @@ class TestAzureFirewallDatapath:
         template_file = os.path.join(os.path.dirname(__file__), 'templates', 'firewallPremiumSkuSandbox.json')
         self.cl.deploy_template(subscriptionId, "perf-deployment", resourceGroup, location, template_file)
 
+				# wait for the network manager settings setup AVNM rules to allow access to geneva runners
+        time.sleep(240)
         sku = FirewallPolicySku()
         sku.tier = "Standard"
         resourceId = self.create_allow_all_firewall_policy(subscriptionId, location, resourceGroup, sku) 
@@ -187,7 +188,6 @@ class TestAzureFirewallDatapath:
         #finally delete the resource group
         #self.cl.delete_resource(resource_group_id, '2019-10-01')
 
-    @pytest.mark.skip(reason="The runner VM is unable to connect to the test resources")
     def test_standard_sku_iperf(self, setup_rg, subscriptionId, location, resourceGroup):
        
         # first deploy the ARM template 
@@ -196,6 +196,8 @@ class TestAzureFirewallDatapath:
         self.cl.deploy_template(subscriptionId, "perf-deployment", resourceGroup, location, template_file)
        
         logger.info("test_standard_sku_iperf (Step 1: Deploying sandbox template succeeded")
+				# wait for the network manager settings setup AVNM rules to allow access to geneva runners
+        time.sleep(240)
 
         sku = FirewallPolicySku()
         sku.tier = "Standard"
@@ -247,6 +249,8 @@ class TestAzureFirewallDatapath:
         self.cl.deploy_template(subscriptionId, "perf-deployment", resourceGroup, location, template_file)
        
         logger.info("test_standard_sku_iperf (Step 1: Deploying sandbox template succeeded")
+				# wait for the network manager settings setup AVNM rules to allow access to geneva runners
+        time.sleep(240)
 
         sku = FirewallPolicySku()
         sku.tier = "Basic"
