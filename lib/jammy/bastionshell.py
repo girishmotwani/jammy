@@ -90,7 +90,7 @@ class BastionShell():
         """
         if self.remote_session is None:
             # Connect to bastion on port 22
-            self.gateway_session = SSHSession(b_hostname, b_username, private_key_file=self.private_key_path).open()
+            self.gateway_session = SSHSession(b_hostname, b_username, private_key_file=self.private_key_path).open(retry=6, retry_interval=12)
             logger.info('[IMPORTANT]Connected to bastion at %s:22 as user %s', b_hostname, b_username)
             # Connect to destination on user provided port
             self.remote_session = self.gateway_session.get_remote_session(dst_hostname, username=dst_username, private_key_file=self.private_key_path)
